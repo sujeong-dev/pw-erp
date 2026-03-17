@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { ROUTES } from '@/src/shared/config';
+import { useRouter } from 'next/navigation';
 
 interface FormErrors {
   email?: string;
@@ -16,6 +18,7 @@ export function LoginForm() {
   const [password, setPassword] = useState("");
   const [rememberEmail, setRememberEmail] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
+  const router = useRouter();
 
   function validate(): FormErrors {
     const next: FormErrors = {};
@@ -96,6 +99,7 @@ export function LoginForm() {
           id="remember-email"
           checked={rememberEmail}
           onCheckedChange={(checked) => setRememberEmail(checked === true)}
+          className='cursor-pointer'
         />
         <Label htmlFor="remember-email" className="cursor-pointer font-normal">
           이메일 기억하기
@@ -103,7 +107,7 @@ export function LoginForm() {
       </div>
 
       {/* Submit */}
-      <Button type="submit" className="w-full" size="lg">
+      <Button type="submit" className="w-full cursor-pointer" size="lg" onClick={()=>router.push(ROUTES.dashboard.root)}>
         로그인
       </Button>
     </form>

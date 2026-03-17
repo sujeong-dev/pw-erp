@@ -1,3 +1,5 @@
-export default function ClientDetailPage({ params }: { params: { id: string } }) {
-  return <div className="p-8">거래처 상세: {params.id}</div>;
+import { ClientDetailPage } from "@/src/pages/clients/ui";
+
+export default function Page({ params }: { params: { id: string } }) {
+  return <ClientDetailPage id={params.id} />;
 }
