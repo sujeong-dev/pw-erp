@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Download, Search } from "lucide-react";
+import { Download, Search, X } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -30,24 +30,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import { TX_STATUS, statusVariant } from "@/src/shared/constants";
+import type { TxStatus } from "@/src/shared/constants";
+import { DateFilter } from "@/src/shared/ui";
 
 type TxType = "매출" | "수금";
-
-const TX_STATUS = {
-  UNPAID:  "입금 전",
-  PARTIAL: "부분 입금",
-  PAID:    "완납",
-  CANCEL:  "취소",
-} as const;
-
-type TxStatus = typeof TX_STATUS[keyof typeof TX_STATUS];
 
 const summaryCards = [
   { label: "총 매출액", amount: 42_800_000, red: false },
@@ -70,12 +58,6 @@ const transactions: { date: string; client: string; type: TxType; amount: number
   { date: "2026-03-04", client: "신한기업",     type: "매출", amount: 560_000,   status: TX_STATUS.PAID },
 ];
 
-const statusVariant: Record<TxStatus, "default" | "secondary" | "outline" | "destructive"> = {
-  [TX_STATUS.UNPAID]:  "secondary",
-  [TX_STATUS.PARTIAL]: "default",
-  [TX_STATUS.PAID]:    "outline",
-  [TX_STATUS.CANCEL]:  "destructive",
-};
 
 function formatAmount(amount: number): string {
   return amount.toLocaleString("ko-KR") + "원";
@@ -104,18 +86,23 @@ export function DashboardPage() {
   }
 
   return (
-    <main className="flex flex-col gap-8 p-8">
+    <main className='flex flex-col gap-8 p-8'>
       {/* Summary Cards */}
-      <section className="grid grid-cols-3 gap-4">
+      <section className='grid grid-cols-3 gap-4'>
         {summaryCards.map((card) => (
           <Card key={card.label}>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground">
+            <CardHeader className='pb-2'>
+              <CardTitle className='text-sm font-medium text-muted-foreground'>
                 {card.label}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className={cn("text-2xl font-bold", card.red && "text-destructive")}>
+              <p
+                className={cn(
+                  'text-2xl font-bold',
+                  card.red && 'text-destructive',
+                )}
+              >
                 {formatAmount(card.amount)}
               </p>
             </CardContent>
@@ -124,66 +111,61 @@ export function DashboardPage() {
       </section>
 
       {/* Transaction Table */}
-      <section className="flex flex-col gap-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">거래 내역</h2>
-          <Button variant="default" size="lg" className="cursor-pointer">
-            <Download className="size-4" />
+      <section className='flex flex-col gap-4'>
+        <div className='flex items-center justify-between'>
+          <h2 className='text-lg font-semibold'>거래 내역</h2>
+          <Button variant='default' size='lg' className='cursor-pointer'>
+            <Download className='size-4' />
             엑셀 다운로드
           </Button>
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-3">
-          <div className="relative w-56">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+        <div className='flex items-center gap-3'>
+          <div className='relative w-56'>
+            <Search className='absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
             <Input
-              placeholder="거래처명 검색"
-              className="pl-9"
+              placeholder='거래처명 검색'
+              className='pl-9'
               value={search}
-              onChange={(e) => { setSearch(e.target.value); resetPage(); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                resetPage();
+              }}
             />
-          </div>
-
-          <div className="flex items-center gap-1">
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-44 justify-start gap-2 cursor-pointer">
-                  <CalendarIcon className="size-4" />
-                  {date ? format(date, "yyyy-MM-dd") : "거래일자"}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <Calendar
-                  mode="single"
-                  selected={date}
-                  onSelect={(d) => { setDate(d); resetPage(); }}
-                />
-              </PopoverContent>
-            </Popover>
-            {date && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="cursor-pointer text-muted-foreground"
-                onClick={() => { setDate(undefined); resetPage(); }}
+            {search && (
+              <button
+                className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer'
+                onClick={() => {
+                  setSearch('');
+                  resetPage();
+                }}
               >
-                초기화
-              </Button>
+                <X className='size-4' />
+              </button>
             )}
           </div>
 
+          <DateFilter
+            value={date}
+            onChange={(d) => { setDate(d); resetPage(); }}
+            placeholder="거래일자"
+          />
+
           <Select
             value={typeFilter}
-            onValueChange={(v) => { setTypeFilter(v as typeof typeFilter); resetPage(); }}
+            onValueChange={(v) => {
+              setTypeFilter(v as typeof typeFilter);
+              resetPage();
+            }}
           >
-            <SelectTrigger className="w-32 cursor-pointer">
-              <SelectValue placeholder="구분" />
+            <SelectTrigger className='w-32 cursor-pointer'>
+              <SelectValue placeholder='구분' />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">전체</SelectItem>
-              <SelectItem value="매출">매출</SelectItem>
-              <SelectItem value="수금">수금</SelectItem>
+              <SelectItem value='all'>전체</SelectItem>
+              <SelectItem value='매출'>매출</SelectItem>
+              <SelectItem value='수금'>수금</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -195,21 +177,29 @@ export function DashboardPage() {
                 <TableHead>거래 일자</TableHead>
                 <TableHead>거래처명</TableHead>
                 <TableHead>구분</TableHead>
-                <TableHead className="text-right">금액</TableHead>
+                <TableHead className='text-right'>금액</TableHead>
                 <TableHead>상태</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {paged.map((tx, i) => (
                 <TableRow key={i}>
-                  <TableCell className="text-muted-foreground">{tx.date}</TableCell>
+                  <TableCell className='text-muted-foreground'>
+                    {tx.date}
+                  </TableCell>
                   <TableCell>{tx.client}</TableCell>
                   <TableCell>{tx.type}</TableCell>
-                  <TableCell className="text-right">{formatAmount(tx.amount)}</TableCell>
+                  <TableCell className='text-right'>
+                    {formatAmount(tx.amount)}
+                  </TableCell>
                   <TableCell>
-                    {tx.status
-                      ? <Badge variant={statusVariant[tx.status]}>{tx.status}</Badge>
-                      : <span className="text-muted-foreground">-</span>}
+                    {tx.status ? (
+                      <Badge variant={statusVariant[tx.status]}>
+                        {tx.status}
+                      </Badge>
+                    ) : (
+                      <span className='text-muted-foreground'>-</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}
@@ -224,7 +214,11 @@ export function DashboardPage() {
                 <PaginationPrevious
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
                   aria-disabled={page === 1}
-                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  className={
+                    page === 1
+                      ? 'pointer-events-none opacity-50'
+                      : 'cursor-pointer'
+                  }
                 />
               </PaginationItem>
               {Array.from({ length: totalPages }, (_, i) => (
@@ -232,7 +226,7 @@ export function DashboardPage() {
                   <PaginationLink
                     isActive={page === i + 1}
                     onClick={() => setPage(i + 1)}
-                    className="cursor-pointer"
+                    className='cursor-pointer'
                   >
                     {i + 1}
                   </PaginationLink>
@@ -242,7 +236,11 @@ export function DashboardPage() {
                 <PaginationNext
                   onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                   aria-disabled={page === totalPages}
-                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  className={
+                    page === totalPages
+                      ? 'pointer-events-none opacity-50'
+                      : 'cursor-pointer'
+                  }
                 />
               </PaginationItem>
             </PaginationContent>
