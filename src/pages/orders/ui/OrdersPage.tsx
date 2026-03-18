@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { CalendarIcon, Plus, Search, X } from "lucide-react";
+import { CalendarIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +46,7 @@ import {
 } from "@/components/ui/pagination";
 import { TX_STATUS, statusVariant } from "@/src/shared/constants";
 import type { TxStatus } from "@/src/shared/constants";
-import { DateFilter } from "@/src/shared/ui";
+import { DateFilter, SearchInput } from "@/src/shared/ui";
 
 const mockClients = [
   "한국무역(주)", "대성산업", "서울전자(주)", "미래물산", "동아상사",
@@ -222,23 +222,12 @@ export function OrdersPage() {
 
       {/* Filters */}
       <div className="flex items-center gap-3">
-        <div className="relative w-56">
-          <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            placeholder="거래처 검색"
-            className="pl-9 pr-9"
-            value={search}
-            onChange={(e) => { setSearch(e.target.value); resetPage(); }}
-          />
-          {search && (
-            <button
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
-              onClick={() => { setSearch(""); resetPage(); }}
-            >
-              <X className="size-4" />
-            </button>
-          )}
-        </div>
+        <SearchInput
+          value={search}
+          onChange={(v) => { setSearch(v); resetPage(); }}
+          placeholder="거래처 검색"
+          className="w-56"
+        />
 
         <DateFilter
           value={dateFilter}

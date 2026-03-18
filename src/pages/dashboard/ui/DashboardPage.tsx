@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Download, Search, X } from "lucide-react";
+import { Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -33,7 +32,7 @@ import {
 import { cn } from "@/lib/utils";
 import { TX_STATUS, statusVariant } from "@/src/shared/constants";
 import type { TxStatus } from "@/src/shared/constants";
-import { DateFilter } from "@/src/shared/ui";
+import { DateFilter, SearchInput } from "@/src/shared/ui";
 
 type TxType = "매출" | "수금";
 
@@ -122,29 +121,12 @@ export function DashboardPage() {
 
         {/* Filters */}
         <div className='flex items-center gap-3'>
-          <div className='relative w-56'>
-            <Search className='absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
-            <Input
-              placeholder='거래처명 검색'
-              className='pl-9'
-              value={search}
-              onChange={(e) => {
-                setSearch(e.target.value);
-                resetPage();
-              }}
-            />
-            {search && (
-              <button
-                className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer'
-                onClick={() => {
-                  setSearch('');
-                  resetPage();
-                }}
-              >
-                <X className='size-4' />
-              </button>
-            )}
-          </div>
+          <SearchInput
+            value={search}
+            onChange={(v) => { setSearch(v); resetPage(); }}
+            placeholder="거래처명 검색"
+            className="w-56"
+          />
 
           <DateFilter
             value={date}

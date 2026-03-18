@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Plus, X } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,6 +30,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { ROUTES } from "@/src/shared/config";
+import { SearchInput } from "@/src/shared/ui";
 
 const mockClients = [
   { id: "C001", name: "한국무역(주)", lastOrderDate: "2026-03-15", unpaidBalance: 1500000 },
@@ -62,9 +63,6 @@ export function ClientsPage() {
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
   const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
-    function resetPage() {
-      setPage(1);
-    }
 
   return (
     <main className='flex flex-col gap-6 p-8'>
@@ -131,29 +129,12 @@ export function ClientsPage() {
         </DialogContent>
       </Dialog>
 
-      <div className='relative w-72'>
-        <Search className='absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground' />
-        <Input
-          placeholder='거래처명 검색'
-          className='pl-9'
-          value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
-        />
-        {search && (
-          <button
-            className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer'
-            onClick={() => {
-              setSearch('');
-              resetPage();
-            }}
-          >
-            <X className='size-4' />
-          </button>
-        )}
-      </div>
+      <SearchInput
+        value={search}
+        onChange={(v) => { setSearch(v); setPage(1); }}
+        placeholder="거래처명 검색"
+        className="w-72"
+      />
 
       <Table>
         <TableHeader>
