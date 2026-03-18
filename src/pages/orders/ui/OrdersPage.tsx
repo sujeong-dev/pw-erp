@@ -102,6 +102,11 @@ export function OrdersPage() {
   const [formDate, setFormDate] = useState<Date | undefined>(undefined);
   const [formDateOpen, setFormDateOpen] = useState(false);
 
+  const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [editForm, setEditForm] = useState({ ...emptyForm });
+  const [editFormDate, setEditFormDate] = useState<Date | undefined>(undefined);
+  const [editFormDateOpen, setEditFormDateOpen] = useState(false);
+
   const filtered = mockOrders.filter((o) => {
     const matchClient = o.client.includes(search);
     const matchDate = !dateFilter || o.orderDate === format(dateFilter, "yyyy-MM-dd");
@@ -121,9 +126,25 @@ export function OrdersPage() {
     }
   }
 
+  function handleEditOpen(order: Order) {
+    setEditingOrder(order);
+    setEditForm({ client: order.client, item: order.item, tons: String(order.tons), unitPrice: String(order.unitPrice), orderDate: undefined });
+    setEditFormDate(new Date(order.orderDate));
+  }
+
+  function handleEditClose() {
+    setEditingOrder(null);
+    setEditForm({ ...emptyForm });
+    setEditFormDate(undefined);
+  }
+
   const tons = parseFloat(form.tons) || 0;
   const unitPrice = parseFloat(form.unitPrice) || 0;
   const totalAmount = tons > 0 && unitPrice > 0 ? calcTotal(tons, unitPrice) : null;
+
+  const editTons = parseFloat(editForm.tons) || 0;
+  const editUnitPrice = parseFloat(editForm.unitPrice) || 0;
+  const editTotalAmount = editTons > 0 && editUnitPrice > 0 ? calcTotal(editTons, editUnitPrice) : null;
 
   return (
     <main className="flex flex-col gap-6 p-8">
@@ -220,6 +241,90 @@ export function OrdersPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Edit Dialog */}
+      <Dialog open={editingOrder !== null} onOpenChange={(v) => { if (!v) handleEditClose(); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>주문 수정</DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col gap-4 py-2">
+            <div className="flex flex-col gap-1.5">
+              <Label>거래처</Label>
+              <Select
+                value={editForm.client}
+                onValueChange={(v) => setEditForm((f) => ({ ...f, client: v }))}
+              >
+                <SelectTrigger className="cursor-pointer">
+                  <SelectValue placeholder="거래처 선택" />
+                </SelectTrigger>
+                <SelectContent>
+                  {mockClients.map((c) => (
+                    <SelectItem key={c} value={c}>{c}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>주문 날짜</Label>
+              <Popover open={editFormDateOpen} onOpenChange={setEditFormDateOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" className="justify-start gap-2 cursor-pointer">
+                    <CalendarIcon className="size-4" />
+                    {editFormDate ? format(editFormDate, "yyyy-MM-dd") : "날짜 선택"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <Calendar
+                    mode="single"
+                    selected={editFormDate}
+                    onSelect={(d) => { setEditFormDate(d); setEditFormDateOpen(false); }}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-item">품목</Label>
+              <Input
+                id="edit-item"
+                placeholder="품목 입력"
+                value={editForm.item}
+                onChange={(e) => setEditForm((f) => ({ ...f, item: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-tons">톤수</Label>
+              <Input
+                id="edit-tons"
+                type="number"
+                placeholder="톤수 입력"
+                value={editForm.tons}
+                onChange={(e) => setEditForm((f) => ({ ...f, tons: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="edit-unit-price">단가</Label>
+              <Input
+                id="edit-unit-price"
+                type="number"
+                placeholder="단가 입력"
+                value={editForm.unitPrice}
+                onChange={(e) => setEditForm((f) => ({ ...f, unitPrice: e.target.value }))}
+              />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>합계 금액 (VAT 10% 포함)</Label>
+              <div className="flex h-9 items-center rounded-md border bg-muted px-3 text-sm text-muted-foreground">
+                {editTotalAmount !== null ? formatAmount(editTotalAmount) : "-"}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleEditClose} className="cursor-pointer">취소</Button>
+            <Button onClick={handleEditClose} className="cursor-pointer">수정</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Filters */}
       <div className="flex items-center gap-3">
         <SearchInput
@@ -264,7 +369,7 @@ export function OrdersPage() {
                 <TableCell>
                   {order.status === TX_STATUS.UNPAID && (
                     <div className="flex items-center gap-2">
-                      <Button variant="outline" size="sm" className="cursor-pointer">수정</Button>
+                      <Button variant="outline" size="sm" className="cursor-pointer" onClick={() => handleEditOpen(order)}>수정</Button>
                       <Button variant="outline" size="sm" className="cursor-pointer">취소</Button>
                     </div>
                   )}
