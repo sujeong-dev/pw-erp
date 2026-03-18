@@ -470,7 +470,7 @@ export function OrdersPage() {
                   {order.status === TX_STATUS.UNPAID && (
                     <div className='flex items-center gap-2'>
                       <Button
-                        variant='outline'
+                        variant='secondary'
                         size='sm'
                         className='cursor-pointer'
                         onClick={() => handleEditOpen(order)}
