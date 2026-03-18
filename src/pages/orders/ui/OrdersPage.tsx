@@ -432,11 +432,11 @@ export function OrdersPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>거래처</TableHead>
               <TableHead>주문 일자</TableHead>
+              <TableHead>거래처</TableHead>
               <TableHead>품목</TableHead>
-              <TableHead className='text-right'>톤수</TableHead>
-              <TableHead className='text-right'>합계 금액</TableHead>
+              <TableHead className='text-left'>톤수</TableHead>
+              <TableHead className='text-left'>합계 금액</TableHead>
               <TableHead>상태</TableHead>
               <TableHead />
             </TableRow>
@@ -444,13 +444,13 @@ export function OrdersPage() {
           <TableBody>
             {paged.map((order) => (
               <TableRow key={order.id}>
-                <TableCell>{order.client}</TableCell>
                 <TableCell className='text-muted-foreground'>
                   {order.orderDate}
                 </TableCell>
+                <TableCell>{order.client}</TableCell>
                 <TableCell>{order.item}</TableCell>
-                <TableCell className='text-right'>{order.tons}t</TableCell>
-                <TableCell className='text-right'>
+                <TableCell className='text-left'>{order.tons}t</TableCell>
+                <TableCell className='text-left'>
                   {formatAmount(calcTotal(order.tons, order.unitPrice))}
                 </TableCell>
                 <TableCell>

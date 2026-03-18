@@ -301,19 +301,18 @@ export function PaymentsPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className='text-center'>유형</TableHead>
+              <TableHead>수금 일자</TableHead>
               <TableHead>거래처</TableHead>
-              <TableHead>유형</TableHead>
-              <TableHead>일자</TableHead>
-              <TableHead className='text-right'>금액</TableHead>
-              <TableHead>수금방법</TableHead>
+              <TableHead className='text-left'>금액</TableHead>
+              <TableHead>방법</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
           <TableBody>
             {paged.map((payment) => (
               <TableRow key={payment.id}>
-                <TableCell>{payment.client}</TableCell>
-                <TableCell>
+                <TableCell className='flex justify-center'>
                   <Badge variant={creditTypeVariant[payment.creditType]}>
                     {payment.creditType}
                   </Badge>
@@ -321,7 +320,8 @@ export function PaymentsPage() {
                 <TableCell className='text-muted-foreground'>
                   {payment.date}
                 </TableCell>
-                <TableCell className='text-right'>
+                <TableCell>{payment.client}</TableCell>
+                <TableCell className='text-left'>
                   {formatAmount(payment.amount)}
                 </TableCell>
                 <TableCell>{payment.method}</TableCell>

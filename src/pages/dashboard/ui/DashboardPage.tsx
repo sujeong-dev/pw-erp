@@ -144,9 +144,9 @@ export function DashboardPage() {
             <TableHeader>
               <TableRow>
                 <TableHead>거래 일자</TableHead>
-                <TableHead>거래처명</TableHead>
                 <TableHead>구분</TableHead>
-                <TableHead className='text-right'>금액</TableHead>
+                <TableHead>거래처명</TableHead>
+                <TableHead>금액</TableHead>
                 <TableHead>상태</TableHead>
               </TableRow>
             </TableHeader>
@@ -156,9 +156,9 @@ export function DashboardPage() {
                   <TableCell className='text-muted-foreground'>
                     {tx.date}
                   </TableCell>
-                  <TableCell>{tx.client}</TableCell>
                   <TableCell>{tx.type}</TableCell>
-                  <TableCell className='text-right'>
+                  <TableCell>{tx.client}</TableCell>
+                  <TableCell className='text-left'>
                     {formatAmount(tx.amount)}
                   </TableCell>
                   <TableCell>
