@@ -13,3 +13,15 @@ export const statusVariant: Record<TxStatus, "default" | "secondary" | "outline"
   [TX_STATUS.PAID]:    "outline",
   [TX_STATUS.CANCEL]:  "destructive",
 };
+
+export const TX_TYPE = {
+  SALES:   "매출",
+  PAYMENT: "수금",
+} as const;
+export type TxType = typeof TX_TYPE[keyof typeof TX_TYPE];
+
+export const CREDIT_TYPE = {
+  DEPOSIT: "입금",
+  REFUND:  "환불",
+} as const;
+export type CreditType = typeof CREDIT_TYPE[keyof typeof CREDIT_TYPE];

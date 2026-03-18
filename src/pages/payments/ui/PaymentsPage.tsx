@@ -304,8 +304,8 @@ export function PaymentsPage() {
               <TableHead className='text-center'>유형</TableHead>
               <TableHead>수금 일자</TableHead>
               <TableHead>거래처</TableHead>
-              <TableHead className='text-left'>금액</TableHead>
-              <TableHead>방법</TableHead>
+              <TableHead className='text-right'>금액</TableHead>
+              <TableHead className='text-center'>방법</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -321,10 +321,10 @@ export function PaymentsPage() {
                   {payment.date}
                 </TableCell>
                 <TableCell>{payment.client}</TableCell>
-                <TableCell className='text-left'>
+                <TableCell className='text-right'>
                   {formatAmount(payment.amount)}
                 </TableCell>
-                <TableCell>{payment.method}</TableCell>
+                <TableCell className='text-center'>{payment.method}</TableCell>
                 <TableCell>
                   {payment.creditType === CREDIT_TYPE.DEPOSIT && (
                     <Button

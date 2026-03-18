@@ -436,8 +436,8 @@ export function OrdersPage() {
               <TableHead>거래처</TableHead>
               <TableHead>품목</TableHead>
               <TableHead className='text-left'>톤수</TableHead>
-              <TableHead className='text-left'>합계 금액</TableHead>
-              <TableHead>상태</TableHead>
+              <TableHead className='text-right'>합계 금액</TableHead>
+              <TableHead className='text-center'>상태</TableHead>
               <TableHead />
             </TableRow>
           </TableHeader>
@@ -450,10 +450,10 @@ export function OrdersPage() {
                 <TableCell>{order.client}</TableCell>
                 <TableCell>{order.item}</TableCell>
                 <TableCell className='text-left'>{order.tons}t</TableCell>
-                <TableCell className='text-left'>
+                <TableCell className='text-right'>
                   {formatAmount(calcTotal(order.tons, order.unitPrice))}
                 </TableCell>
-                <TableCell>
+                <TableCell className='flex justify-center'>
                   <Badge variant={statusVariant[order.status]}>
                     {order.status}
                   </Badge>

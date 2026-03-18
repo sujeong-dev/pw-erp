@@ -146,8 +146,8 @@ export function DashboardPage() {
                 <TableHead>거래 일자</TableHead>
                 <TableHead>구분</TableHead>
                 <TableHead>거래처명</TableHead>
-                <TableHead>금액</TableHead>
-                <TableHead>상태</TableHead>
+                <TableHead className='text-right'>금액</TableHead>
+                <TableHead className='text-center'>상태</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -158,10 +158,10 @@ export function DashboardPage() {
                   </TableCell>
                   <TableCell>{tx.type}</TableCell>
                   <TableCell>{tx.client}</TableCell>
-                  <TableCell className='text-left'>
+                  <TableCell className='text-right'>
                     {formatAmount(tx.amount)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className='flex justify-center'>
                     {tx.status ? (
                       <Badge variant={statusVariant[tx.status]}>
                         {tx.status}

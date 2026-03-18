@@ -142,7 +142,7 @@ export function ClientsPage() {
             <TableHead>거래처 ID</TableHead>
             <TableHead>거래처명</TableHead>
             <TableHead>최근 거래일</TableHead>
-            <TableHead>미수금 잔액</TableHead>
+            <TableHead className='text-right'>미수금 잔액</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -157,7 +157,7 @@ export function ClientsPage() {
               <TableCell>{client.id}</TableCell>
               <TableCell>{client.name}</TableCell>
               <TableCell>{client.lastOrderDate}</TableCell>
-              <TableCell className='text-destructive font-medium'>
+              <TableCell className='text-destructive font-medium text-right'>
                 {client.unpaidBalance.toLocaleString('ko-KR')}원
               </TableCell>
             </TableRow>

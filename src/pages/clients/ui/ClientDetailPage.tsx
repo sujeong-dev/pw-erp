@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useState } from "react";
-import { Download, Plus, ChevronRight } from "lucide-react";
+import { format } from "date-fns";
+import { Download, ChevronRight, Plus, Minus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -28,6 +29,9 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { ROUTES } from "@/src/shared/config";
+import { TX_STATUS, TX_TYPE, CREDIT_TYPE, statusVariant } from "@/src/shared/constants";
+import type { TxStatus, TxType, CreditType } from "@/src/shared/constants";
+import { DateFilter, SelectFilter } from "@/src/shared/ui";
 
 type ClientDetail = {
   name: string;
@@ -40,11 +44,10 @@ type ClientDetail = {
 
 type Transaction = {
   date: string;
-  type: "주문" | "입금";
+  type: TxType;
   amount: number;
-  note: string;
-  status: "상승" | "정상" | "주의";
-  balance: number;
+  status: TxStatus | null;
+  creditType?: CreditType;
 };
 
 const mockClientDetails: Record<string, ClientDetail> = {
@@ -56,33 +59,41 @@ const mockClientDetails: Record<string, ClientDetail> = {
 };
 
 const mockTransactions: Transaction[] = [
-  { date: "2026-03-15", type: "주문", amount: 1200000, note: "3월 정기 주문", status: "정상", balance: 1500000 },
-  { date: "2026-03-12", type: "입금", amount: 800000, note: "2월분 입금", status: "정상", balance: 300000 },
-  { date: "2026-03-10", type: "주문", amount: 950000, note: "긴급 추가 주문", status: "상승", balance: 1100000 },
-  { date: "2026-03-08", type: "입금", amount: 500000, note: "부분 입금", status: "주의", balance: 150000 },
-  { date: "2026-03-05", type: "주문", amount: 620000, note: "2월 말 주문", status: "정상", balance: 650000 },
-  { date: "2026-03-01", type: "입금", amount: 1000000, note: "1월분 정산", status: "정상", balance: 30000 },
-  { date: "2026-02-25", type: "주문", amount: 780000, note: "정기 주문", status: "정상", balance: 1030000 },
-  { date: "2026-02-20", type: "입금", amount: 600000, note: "부분 결제", status: "주의", balance: 250000 },
-  { date: "2026-02-15", type: "주문", amount: 430000, note: "샘플 주문", status: "상승", balance: 850000 },
-  { date: "2026-02-10", type: "입금", amount: 1200000, note: "1월 전액 정산", status: "정상", balance: 420000 },
-  { date: "2026-02-05", type: "주문", amount: 890000, note: "1월 정기 주문", status: "정상", balance: 1620000 },
-  { date: "2026-01-28", type: "입금", amount: 700000, note: "12월분 입금", status: "정상", balance: 730000 },
+  { date: "2026-03-15", type: TX_TYPE.SALES,   amount: 1_200_000, status: TX_STATUS.UNPAID },
+  { date: "2026-03-12", type: TX_TYPE.PAYMENT, amount: 800_000,   status: null, creditType: CREDIT_TYPE.DEPOSIT },
+  { date: "2026-03-10", type: TX_TYPE.SALES,   amount: 950_000,   status: TX_STATUS.PARTIAL },
+  { date: "2026-03-08", type: TX_TYPE.PAYMENT, amount: 500_000,   status: null, creditType: CREDIT_TYPE.REFUND },
+  { date: "2026-03-05", type: TX_TYPE.SALES,   amount: 620_000,   status: TX_STATUS.PAID },
+  { date: "2026-03-01", type: TX_TYPE.PAYMENT, amount: 1_000_000, status: null, creditType: CREDIT_TYPE.DEPOSIT },
+  { date: "2026-02-25", type: TX_TYPE.SALES,   amount: 780_000,   status: TX_STATUS.UNPAID },
+  { date: "2026-02-20", type: TX_TYPE.PAYMENT, amount: 600_000,   status: null, creditType: CREDIT_TYPE.DEPOSIT },
+  { date: "2026-02-15", type: TX_TYPE.SALES,   amount: 430_000,   status: TX_STATUS.CANCEL },
+  { date: "2026-02-10", type: TX_TYPE.PAYMENT, amount: 1_200_000, status: null, creditType: CREDIT_TYPE.REFUND },
+  { date: "2026-02-05", type: TX_TYPE.SALES,   amount: 890_000,   status: TX_STATUS.PAID },
+  { date: "2026-01-28", type: TX_TYPE.PAYMENT, amount: 700_000,   status: null, creditType: CREDIT_TYPE.DEPOSIT },
 ];
+
+function formatAmount(amount: number): string {
+  return amount.toLocaleString("ko-KR") + "원";
+}
 
 const PAGE_SIZE = 10;
 
-const statusBadgeVariant: Record<Transaction["status"], "default" | "secondary" | "destructive"> = {
-  상승: "default",
-  정상: "secondary",
-  주의: "destructive",
-};
-
 export function ClientDetailPage({ id }: { id: string }) {
   const [page, setPage] = useState(1);
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [typeFilter, setTypeFilter] = useState<"all" | TxType>("all");
+
   const client = mockClientDetails[id] ?? mockClientDetails["C001"];
-  const totalPages = Math.ceil(mockTransactions.length / PAGE_SIZE);
-  const paged = mockTransactions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  const filtered = mockTransactions.filter((tx) => {
+    const matchDate = !date || tx.date === format(date, "yyyy-MM-dd");
+    const matchType = typeFilter === "all" || tx.type === typeFilter;
+    return matchDate && matchType;
+  });
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   return (
     <main className="flex flex-col gap-6 p-8">
@@ -147,44 +158,72 @@ export function ClientDetailPage({ id }: { id: string }) {
       </Card>
 
       {/* Transaction Ledger */}
-      {/* 거래일자, 구분 필터 */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">거래내역 원장</h2>
-          <div className="flex gap-2">
-            <Button variant="outline" className="cursor-pointer">
-              <Download className="size-4" />
-              엑셀 다운로드
-            </Button>
-          </div>
+          <Button variant="default" className="cursor-pointer">
+            <Download className="size-4" />
+            엑셀 다운로드
+          </Button>
         </div>
 
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>거래일자</TableHead>
-              <TableHead>구분</TableHead>
-              <TableHead className="text-right">금액</TableHead>
-              <TableHead>적요</TableHead>
-              <TableHead>상태</TableHead>
-              <TableHead className="text-right">잔액</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {paged.map((tx, i) => (
-              <TableRow key={i}>
-                <TableCell>{tx.date}</TableCell>
-                <TableCell>{tx.type}</TableCell>
-                <TableCell className="text-right">{tx.amount.toLocaleString("ko-KR")}원</TableCell>
-                <TableCell className="text-muted-foreground">{tx.note}</TableCell>
-                <TableCell>
-                  <Badge variant={statusBadgeVariant[tx.status]}>{tx.status}</Badge>
-                </TableCell>
-                <TableCell className="text-right">{tx.balance.toLocaleString("ko-KR")}원</TableCell>
+        {/* Filters */}
+        <div className="flex items-center gap-3">
+          <DateFilter
+            value={date}
+            onChange={(d) => { setDate(d); setPage(1); }}
+            placeholder="거래 일자"
+          />
+          <SelectFilter
+            value={typeFilter}
+            onChange={(v) => { setTypeFilter(v as "all" | TxType); setPage(1); }}
+            options={[
+              { value: "all", label: "구분 전체" },
+              { value: TX_TYPE.SALES, label: TX_TYPE.SALES },
+              { value: TX_TYPE.PAYMENT, label: TX_TYPE.PAYMENT },
+            ]}
+            className="w-32"
+          />
+        </div>
+
+        <Card>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>거래 일자</TableHead>
+                <TableHead>구분</TableHead>
+                <TableHead className="text-right">금액</TableHead>
+                <TableHead className='text-center'>상태</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {paged.map((tx, i) => (
+                <TableRow key={i}>
+                  <TableCell className="text-muted-foreground">{tx.date}</TableCell>
+                  <TableCell>{tx.type}</TableCell>
+                  <TableCell className="text-right">
+                    <span className="inline-flex items-center justify-end gap-1">
+                      {tx.type === TX_TYPE.PAYMENT && tx.creditType === CREDIT_TYPE.DEPOSIT && (
+                        <Plus className="size-3 text-primary" />
+                      )}
+                      {tx.type === TX_TYPE.PAYMENT && tx.creditType === CREDIT_TYPE.REFUND && (
+                        <Minus className="size-3 text-destructive" />
+                      )}
+                      {formatAmount(tx.amount)}
+                    </span>
+                  </TableCell>
+                  <TableCell className='flex justify-center'>
+                    {tx.type === TX_TYPE.SALES && tx.status ? (
+                      <Badge variant={statusVariant[tx.status]}>{tx.status}</Badge>
+                    ) : (
+                      <span className="text-muted-foreground">-</span>
+                    )}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </Card>
 
         {totalPages > 1 && (
           <Pagination>
