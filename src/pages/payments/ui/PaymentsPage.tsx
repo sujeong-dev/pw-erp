@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { CalendarIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { DateFilter, SearchInput, SelectFilter } from "@/src/shared/ui";
+import { ROUTES } from "@/src/shared/config";
 
 const CREDIT_TYPE = {
   DEPOSIT: "입금",
@@ -77,19 +79,20 @@ type Payment = {
   date: string;
   amount: number;
   method: PaymentMethod;
+  memo?: string;
 };
 
 const mockPayments: Payment[] = [
-  { id: "P001", client: "한국무역(주)", creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-17", amount: 4_400_000, method: PAYMENT_METHOD.CASH },
+  { id: "P001", client: "한국무역(주)", creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-17", amount: 4_400_000, method: PAYMENT_METHOD.CASH, memo: "3월 정기 수금" },
   { id: "P002", client: "대성산업",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-16", amount: 3_344_000, method: PAYMENT_METHOD.NOTE },
-  { id: "P003", client: "서울전자(주)", creditType: CREDIT_TYPE.REFUND,  date: "2026-03-15", amount: 2_376_000, method: PAYMENT_METHOD.CASH },
+  { id: "P003", client: "서울전자(주)", creditType: CREDIT_TYPE.REFUND,  date: "2026-03-15", amount: 2_376_000, method: PAYMENT_METHOD.CASH, memo: "불량품 환불 처리" },
   { id: "P004", client: "미래물산",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-14", amount: 1_925_000, method: PAYMENT_METHOD.CASH },
   { id: "P005", client: "동아상사",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-13", amount: 7_040_000, method: PAYMENT_METHOD.NOTE },
   { id: "P006", client: "태양무역",     creditType: CREDIT_TYPE.REFUND,  date: "2026-03-12", amount: 4_702_500, method: PAYMENT_METHOD.CASH },
   { id: "P007", client: "국제기업(주)", creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-11", amount: 1_056_000, method: PAYMENT_METHOD.NOTE },
   { id: "P008", client: "한빛산업",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-10", amount: 2_310_000, method: PAYMENT_METHOD.CASH },
   { id: "P009", client: "성진상사",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-09", amount: 1_760_000, method: PAYMENT_METHOD.CASH },
-  { id: "P010", client: "우리물산",     creditType: CREDIT_TYPE.REFUND,  date: "2026-03-08", amount: 1_567_500, method: PAYMENT_METHOD.NOTE },
+  { id: "P010", client: "우리물산",     creditType: CREDIT_TYPE.REFUND,  date: "2026-03-08", amount: 1_567_500, method: PAYMENT_METHOD.NOTE, memo: "계약 취소에 따른 환불" },
   { id: "P011", client: "현대유통",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-07", amount: 7_920_000, method: PAYMENT_METHOD.NOTE },
   { id: "P012", client: "신한기업",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-06", amount: 385_000,   method: PAYMENT_METHOD.CASH },
   { id: "P013", client: "한국무역(주)", creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-05", amount: 8_800_000, method: PAYMENT_METHOD.NOTE },
@@ -110,6 +113,7 @@ const emptyForm = {
 };
 
 export function PaymentsPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const [methodFilter, setMethodFilter] = useState<"all" | PaymentMethod>("all");
@@ -311,7 +315,11 @@ export function PaymentsPage() {
           </TableHeader>
           <TableBody>
             {paged.map((payment) => (
-              <TableRow key={payment.id}>
+              <TableRow
+                key={payment.id}
+                className='cursor-pointer'
+                onClick={() => router.push(ROUTES.dashboard.paymentDetail(payment.id))}
+              >
                 <TableCell className='flex justify-center'>
                   <Badge variant={creditTypeVariant[payment.creditType]}>
                     {payment.creditType}
@@ -331,6 +339,7 @@ export function PaymentsPage() {
                       variant='destructive'
                       size='sm'
                       className='cursor-pointer'
+                      onClick={(e) => e.stopPropagation()}
                     >
                       환불
                     </Button>

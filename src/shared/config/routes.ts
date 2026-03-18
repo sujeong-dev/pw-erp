@@ -7,6 +7,7 @@ export const ROUTES = {
     orders: '/dashboard/orders',
     orderDetail: (id: string | number) => `/dashboard/orders/${id}`,
     payments: '/dashboard/payments',
+    paymentDetail: (id: string | number) => `/dashboard/payments/${id}`,
     ledger: '/dashboard/ledger',
   },
 } as const;
