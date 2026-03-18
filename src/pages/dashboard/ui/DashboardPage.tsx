@@ -1,5 +1,11 @@
+"use client";
+
+import { useState } from "react";
+import { format } from "date-fns";
+import { CalendarIcon, Download, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -9,86 +15,239 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+
+type TxType = "매출" | "수금";
+
+const TX_STATUS = {
+  UNPAID:  "입금 전",
+  PARTIAL: "부분 입금",
+  PAID:    "완납",
+  CANCEL:  "취소",
+} as const;
+
+type TxStatus = typeof TX_STATUS[keyof typeof TX_STATUS];
 
 const summaryCards = [
-  { label: "이번 달 총 매출", amount: 12_500_000 },
-  { label: "이번 달 입금액", amount: 8_200_000 },
-  { label: "이번 달 미정산액", amount: 4_300_000 },
+  { label: "총 매출액", amount: 42_800_000, red: false },
+  { label: "총 입금액", amount: 35_200_000, red: false },
+  { label: "총 미수금 잔액", amount: 7_600_000, red: true },
 ];
 
-const recentTransactions = [
-  { date: "2026-03-17", client: "ABC주식회사", type: "매출", amount: 3_500_000, status: "입금완료" },
-  { date: "2026-03-15", client: "DEF산업", type: "매출", amount: 2_200_000, status: "미정산" },
-  { date: "2026-03-12", client: "GHI상사", type: "매출", amount: 1_800_000, status: "입금완료" },
-  { date: "2026-03-10", client: "JKL코퍼레이션", type: "환불", amount: -500_000, status: "처리완료" },
-  { date: "2026-03-08", client: "MNO파트너스", type: "매출", amount: 4_800_000, status: "미정산" },
+const transactions: { date: string; client: string; type: TxType; amount: number; status: TxStatus | null }[] = [
+  { date: "2026-03-17", client: "한국무역(주)", type: "매출", amount: 3_500_000, status: TX_STATUS.UNPAID },
+  { date: "2026-03-15", client: "대성산업",     type: "수금", amount: 2_200_000, status: null },
+  { date: "2026-03-14", client: "서울전자(주)", type: "매출", amount: 1_800_000, status: TX_STATUS.PAID },
+  { date: "2026-03-12", client: "미래물산",     type: "매출", amount: 950_000,   status: TX_STATUS.PARTIAL },
+  { date: "2026-03-11", client: "동아상사",     type: "수금", amount: 1_200_000, status: null },
+  { date: "2026-03-10", client: "태양무역",     type: "매출", amount: 4_800_000, status: TX_STATUS.CANCEL },
+  { date: "2026-03-09", client: "국제기업(주)", type: "매출", amount: 680_000,   status: TX_STATUS.PAID },
+  { date: "2026-03-08", client: "한빛산업",     type: "수금", amount: 2_750_000, status: null },
+  { date: "2026-03-07", client: "성진상사",     type: "매출", amount: 1_300_000, status: TX_STATUS.UNPAID },
+  { date: "2026-03-06", client: "우리물산",     type: "매출", amount: 900_000,   status: TX_STATUS.PARTIAL },
+  { date: "2026-03-05", client: "현대유통",     type: "수금", amount: 3_200_000, status: null },
+  { date: "2026-03-04", client: "신한기업",     type: "매출", amount: 560_000,   status: TX_STATUS.PAID },
 ];
 
-const statusVariant: Record<string, "default" | "secondary" | "outline"> = {
-  입금완료: "default",
-  미정산: "secondary",
-  처리완료: "outline",
+const statusVariant: Record<TxStatus, "default" | "secondary" | "outline" | "destructive"> = {
+  [TX_STATUS.UNPAID]:  "secondary",
+  [TX_STATUS.PARTIAL]: "default",
+  [TX_STATUS.PAID]:    "outline",
+  [TX_STATUS.CANCEL]:  "destructive",
 };
 
 function formatAmount(amount: number): string {
   return amount.toLocaleString("ko-KR") + "원";
 }
 
+const PAGE_SIZE = 10;
+
 export function DashboardPage() {
+  const [search, setSearch] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [typeFilter, setTypeFilter] = useState<"all" | TxType>("all");
+  const [page, setPage] = useState(1);
+
+  const filtered = transactions.filter((tx) => {
+    const matchClient = tx.client.includes(search);
+    const matchDate = !date || tx.date === format(date, "yyyy-MM-dd");
+    const matchType = typeFilter === "all" || tx.type === typeFilter;
+    return matchClient && matchDate && matchType;
+  });
+
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+  function resetPage() {
+    setPage(1);
+  }
+
   return (
     <main className="flex flex-col gap-8 p-8">
       {/* Summary Cards */}
       <section className="grid grid-cols-3 gap-4">
         {summaryCards.map((card) => (
           <Card key={card.label}>
-            <CardHeader>
+            <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {card.label}
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p className="text-2xl font-bold">{formatAmount(card.amount)}</p>
+              <p className={cn("text-2xl font-bold", card.red && "text-destructive")}>
+                {formatAmount(card.amount)}
+              </p>
             </CardContent>
           </Card>
         ))}
       </section>
 
-      {/* Recent Transactions */}
+      {/* Transaction Table */}
       <section className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">최신 거래 내역</h2>
-          <Button variant="outline" size="sm">
-            전체보기
+          <h2 className="text-lg font-semibold">거래 내역</h2>
+          <Button variant="default" size="lg" className="cursor-pointer">
+            <Download className="size-4" />
+            엑셀 다운로드
           </Button>
         </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-3">
+          <div className="relative w-56">
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="거래처명 검색"
+              className="pl-9"
+              value={search}
+              onChange={(e) => { setSearch(e.target.value); resetPage(); }}
+            />
+          </div>
+
+          <div className="flex items-center gap-1">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="w-44 justify-start gap-2 cursor-pointer">
+                  <CalendarIcon className="size-4" />
+                  {date ? format(date, "yyyy-MM-dd") : "거래일자"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={date}
+                  onSelect={(d) => { setDate(d); resetPage(); }}
+                />
+              </PopoverContent>
+            </Popover>
+            {date && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="cursor-pointer text-muted-foreground"
+                onClick={() => { setDate(undefined); resetPage(); }}
+              >
+                초기화
+              </Button>
+            )}
+          </div>
+
+          <Select
+            value={typeFilter}
+            onValueChange={(v) => { setTypeFilter(v as typeof typeFilter); resetPage(); }}
+          >
+            <SelectTrigger className="w-32 cursor-pointer">
+              <SelectValue placeholder="구분" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">전체</SelectItem>
+              <SelectItem value="매출">매출</SelectItem>
+              <SelectItem value="수금">수금</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
         <Card>
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>날짜</TableHead>
-                <TableHead>거래처</TableHead>
+                <TableHead>거래 일자</TableHead>
+                <TableHead>거래처명</TableHead>
                 <TableHead>구분</TableHead>
                 <TableHead className="text-right">금액</TableHead>
                 <TableHead>상태</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {recentTransactions.map((tx, i) => (
+              {paged.map((tx, i) => (
                 <TableRow key={i}>
                   <TableCell className="text-muted-foreground">{tx.date}</TableCell>
                   <TableCell>{tx.client}</TableCell>
                   <TableCell>{tx.type}</TableCell>
                   <TableCell className="text-right">{formatAmount(tx.amount)}</TableCell>
                   <TableCell>
-                    <Badge variant={statusVariant[tx.status] ?? "outline"}>
-                      {tx.status}
-                    </Badge>
+                    {tx.status
+                      ? <Badge variant={statusVariant[tx.status]}>{tx.status}</Badge>
+                      : <span className="text-muted-foreground">-</span>}
                   </TableCell>
                 </TableRow>
               ))}
             </TableBody>
           </Table>
         </Card>
+
+        {totalPages > 1 && (
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  aria-disabled={page === 1}
+                  className={page === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+              {Array.from({ length: totalPages }, (_, i) => (
+                <PaginationItem key={i + 1}>
+                  <PaginationLink
+                    isActive={page === i + 1}
+                    onClick={() => setPage(i + 1)}
+                    className="cursor-pointer"
+                  >
+                    {i + 1}
+                  </PaginationLink>
+                </PaginationItem>
+              ))}
+              <PaginationItem>
+                <PaginationNext
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  aria-disabled={page === totalPages}
+                  className={page === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        )}
       </section>
     </main>
   );
