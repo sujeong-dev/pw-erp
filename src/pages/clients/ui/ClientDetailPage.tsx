@@ -92,7 +92,7 @@ export function ClientDetailPage({ id }: { id: string }) {
           거래처 관리
         </Link>
         <ChevronRight className="size-4" />
-        <span className="text-foreground font-medium">거래처 상세 ({client.name})</span>
+        <span className="text-foreground font-medium">{client.name}</span>
       </nav>
 
       {/* Summary Cards */}
@@ -147,6 +147,7 @@ export function ClientDetailPage({ id }: { id: string }) {
       </Card>
 
       {/* Transaction Ledger */}
+      {/* 거래일자, 구분 필터 */}
       <div className="flex flex-col gap-4">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">거래내역 원장</h2>

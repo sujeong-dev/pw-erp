@@ -1,11 +1,11 @@
 export const ROUTES = {
-  login: "/login",
+  login: '/login',
   dashboard: {
-    root: "/dashboard",
-    clients: "/dashboard/clients",
+    root: '/dashboard/clients',
+    clients: '/dashboard/clients',
     clientDetail: (id: string | number) => `/dashboard/clients/${id}`,
-    orders: "/dashboard/orders",
-    payments: "/dashboard/payments",
-    ledger: "/dashboard/ledger",
+    orders: '/dashboard/orders',
+    payments: '/dashboard/payments',
+    ledger: '/dashboard/ledger',
   },
 } as const;

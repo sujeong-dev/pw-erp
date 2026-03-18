@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  LayoutDashboard,
   Building2,
   ShoppingCart,
   Banknote,
@@ -13,10 +12,9 @@ import { cn } from "@/lib/utils";
 import { ROUTES } from "@/src/shared/config";
 
 const navItems = [
-  { label: "대시보드", href: ROUTES.dashboard.root, icon: LayoutDashboard, exact: true },
   { label: "거래처 관리", href: ROUTES.dashboard.clients, icon: Building2, exact: false },
-  { label: "주문 내역", href: ROUTES.dashboard.orders, icon: ShoppingCart, exact: false },
-  { label: "입금 내역", href: ROUTES.dashboard.payments, icon: Banknote, exact: false },
+  { label: "매출 내역", href: ROUTES.dashboard.orders, icon: ShoppingCart, exact: false },
+  { label: "수금 내역", href: ROUTES.dashboard.payments, icon: Banknote, exact: false },
   { label: "전체 장부", href: ROUTES.dashboard.ledger, icon: BookOpen, exact: false },
 ];
 
