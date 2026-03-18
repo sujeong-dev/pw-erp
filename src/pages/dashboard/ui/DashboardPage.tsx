@@ -22,17 +22,10 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { TX_STATUS, statusVariant } from "@/src/shared/constants";
 import type { TxStatus } from "@/src/shared/constants";
-import { DateFilter, SearchInput } from "@/src/shared/ui";
+import { DateFilter, SearchInput, SelectFilter } from "@/src/shared/ui";
 
 type TxType = "매출" | "수금";
 
@@ -134,22 +127,16 @@ export function DashboardPage() {
             placeholder="거래일자"
           />
 
-          <Select
+          <SelectFilter
             value={typeFilter}
-            onValueChange={(v) => {
-              setTypeFilter(v as typeof typeFilter);
-              resetPage();
-            }}
-          >
-            <SelectTrigger className='w-32 cursor-pointer'>
-              <SelectValue placeholder='구분' />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value='all'>전체</SelectItem>
-              <SelectItem value='매출'>매출</SelectItem>
-              <SelectItem value='수금'>수금</SelectItem>
-            </SelectContent>
-          </Select>
+            onChange={(v) => { setTypeFilter(v as typeof typeFilter); resetPage(); }}
+            options={[
+              { value: "all", label: "구분 전체" },
+              { value: "매출", label: "매출" },
+              { value: "수금", label: "수금" },
+            ]}
+            className="w-32"
+          />
         </div>
 
         <Card>

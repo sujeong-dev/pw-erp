@@ -45,7 +45,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { DateFilter, SearchInput } from "@/src/shared/ui";
+import { DateFilter, SearchInput, SelectFilter } from "@/src/shared/ui";
 
 const CREDIT_TYPE = {
   DEPOSIT: "입금",
@@ -284,26 +284,16 @@ export function PaymentsPage() {
           }}
           placeholder='수금 일자'
         />
-        <Select
+        <SelectFilter
           value={methodFilter}
-          onValueChange={(v) => {
-            setMethodFilter(v as 'all' | PaymentMethod);
-            resetPage();
-          }}
-        >
-          <SelectTrigger className='w-36 cursor-pointer'>
-            <SelectValue placeholder='수금방법' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='all'>방법 전체</SelectItem>
-            <SelectItem value={PAYMENT_METHOD.CASH}>
-              {PAYMENT_METHOD.CASH}
-            </SelectItem>
-            <SelectItem value={PAYMENT_METHOD.NOTE}>
-              {PAYMENT_METHOD.NOTE}
-            </SelectItem>
-          </SelectContent>
-        </Select>
+          onChange={(v) => { setMethodFilter(v as "all" | PaymentMethod); resetPage(); }}
+          options={[
+            { value: "all", label: "방법 전체" },
+            { value: PAYMENT_METHOD.CASH, label: PAYMENT_METHOD.CASH },
+            { value: PAYMENT_METHOD.NOTE, label: PAYMENT_METHOD.NOTE },
+          ]}
+          className="w-36"
+        />
       </div>
 
       {/* Table */}
