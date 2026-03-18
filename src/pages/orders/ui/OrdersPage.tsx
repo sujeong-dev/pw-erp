@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { CalendarIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { TX_STATUS, statusVariant } from "@/src/shared/constants";
+import { ROUTES } from "@/src/shared/config";
 import type { TxStatus } from "@/src/shared/constants";
 import { DateFilter, SearchInput } from "@/src/shared/ui";
 
@@ -63,12 +65,13 @@ type Order = {
   tons: number;
   unitPrice: number;
   status: TxStatus;
+  memo?: string;
 };
 
 const mockOrders: Order[] = [
-  { id: "O001", client: "한국무역(주)",  orderDate: "2026-03-17", item: "철근",   tons: 5.0,  unitPrice: 800_000,  status: TX_STATUS.UNPAID },
+  { id: "O001", client: "한국무역(주)",  orderDate: "2026-03-17", item: "철근",   tons: 5.0,  unitPrice: 800_000,  status: TX_STATUS.UNPAID, memo: "긴급 납품 요청" },
   { id: "O002", client: "대성산업",      orderDate: "2026-03-15", item: "H빔",    tons: 3.2,  unitPrice: 950_000,  status: TX_STATUS.PAID },
-  { id: "O003", client: "서울전자(주)",  orderDate: "2026-03-14", item: "철판",   tons: 1.8,  unitPrice: 1_200_000, status: TX_STATUS.PARTIAL },
+  { id: "O003", client: "서울전자(주)",  orderDate: "2026-03-14", item: "철판",   tons: 1.8,  unitPrice: 1_200_000, status: TX_STATUS.PARTIAL, memo: "부분 납품 완료, 잔여분 3월 말 납품 예정" },
   { id: "O004", client: "미래물산",      orderDate: "2026-03-12", item: "앵글",   tons: 2.5,  unitPrice: 700_000,  status: TX_STATUS.UNPAID },
   { id: "O005", client: "동아상사",      orderDate: "2026-03-11", item: "철근",   tons: 8.0,  unitPrice: 800_000,  status: TX_STATUS.CANCEL },
   { id: "O006", client: "태양무역",      orderDate: "2026-03-10", item: "H빔",    tons: 4.5,  unitPrice: 950_000,  status: TX_STATUS.PAID },
@@ -95,6 +98,7 @@ const PAGE_SIZE = 10;
 const emptyForm = { client: "", orderDate: undefined as Date | undefined, item: "", tons: "", unitPrice: "", memo: "" };
 
 export function OrdersPage() {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const [page, setPage] = useState(1);
@@ -443,7 +447,11 @@ export function OrdersPage() {
           </TableHeader>
           <TableBody>
             {paged.map((order) => (
-              <TableRow key={order.id}>
+              <TableRow
+                key={order.id}
+                className="cursor-pointer"
+                onClick={() => router.push(ROUTES.dashboard.orderDetail(order.id))}
+              >
                 <TableCell className='text-muted-foreground'>
                   {order.orderDate}
                 </TableCell>
@@ -458,7 +466,7 @@ export function OrdersPage() {
                     {order.status}
                   </Badge>
                 </TableCell>
-                <TableCell>
+                <TableCell onClick={(e) => e.stopPropagation()}>
                   {order.status === TX_STATUS.UNPAID && (
                     <div className='flex items-center gap-2'>
                       <Button
