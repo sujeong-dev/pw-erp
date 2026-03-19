@@ -1,5 +1,6 @@
 import ky from 'ky';
 import { useAuthStore } from '@/src/features/auth/model/authStore';
+import { ROUTES } from '../config';
 
 type TokenResponse = {
   tokenType: string;
@@ -46,7 +47,7 @@ export const apiClient = ky.create({
             })
             .catch(() => {
               useAuthStore.getState().clear();
-              window.location.href = '/login';
+              window.location.href = ROUTES.login;
               throw new Error('Session expired');
             })
             .finally(() => {
