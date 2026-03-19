@@ -8,7 +8,7 @@ type TokenResponse = {
   refreshToken: string;
 };
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL!;
+const baseUrl = process.env.NEXT_PUBLIC_API_URL;
 
 // Plain ky instance with no interceptors — used only for token refresh to avoid infinite loop
 const baseKy = ky.create({ prefixUrl: baseUrl });
