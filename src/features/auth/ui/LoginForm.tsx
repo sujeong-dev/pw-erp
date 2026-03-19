@@ -66,7 +66,7 @@ export function LoginForm() {
         <Input
           id="email"
           type="email"
-          placeholder="example@email.com"
+          placeholder="example@naver.com"
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? "email-error" : undefined}
           {...register("email")}
@@ -86,7 +86,6 @@ export function LoginForm() {
         <Input
           id="password"
           type="password"
-          placeholder="8자 이상 입력해 주세요"
           aria-invalid={!!errors.password}
           aria-describedby={errors.password ? "password-error" : undefined}
           {...register("password")}

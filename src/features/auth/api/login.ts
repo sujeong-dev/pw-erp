@@ -1,4 +1,4 @@
-import { apiClient } from '@/src/shared/api';
+import ky from 'ky';
 
 export type LoginRequest = { email: string; password: string };
 export type LoginResponse = {
@@ -8,5 +8,5 @@ export type LoginResponse = {
 };
 
 export async function login(body: LoginRequest): Promise<LoginResponse> {
-  return apiClient.post('api/auth/login', { json: body }).json<LoginResponse>();
+  return ky.post(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, { json: body }).json<LoginResponse>();
 }
