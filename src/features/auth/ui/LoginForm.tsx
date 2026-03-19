@@ -1,47 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect } from "react";
+import { useForm, useWatch } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ROUTES } from '@/src/shared/config';
-import { useRouter } from 'next/navigation';
+import { useLogin, useAuthStore } from "@/src/features/auth/model";
 
-interface FormErrors {
-  email?: string;
-  password?: string;
-}
+const schema = z.object({
+  email: z.email("올바른 이메일 형식을 입력해 주세요."),
+  password: z.string(),
+  rememberEmail: z.boolean(),
+});
+
+type FormValues = z.infer<typeof schema>;
 
 export function LoginForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [rememberEmail, setRememberEmail] = useState(false);
-  const [errors, setErrors] = useState<FormErrors>({});
-  const router = useRouter();
+  const { mutate: login, isPending } = useLogin();
+  const setRememberedEmail = useAuthStore((s) => s.setRememberedEmail);
 
-  function validate(): FormErrors {
-    const next: FormErrors = {};
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      next.email = "올바른 이메일 형식을 입력해 주세요.";
-    }
-    if (password.length < 8) {
-      next.password = "비밀번호는 최소 8자 이상이어야 합니다.";
-    }
-    return next;
-  }
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    setError,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(schema),
+    defaultValues: { email: '', password: '', rememberEmail: false },
+  });
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    const next = validate();
-    setErrors(next);
-    if (Object.keys(next).length === 0) {
-      // TODO: submit login
+  useEffect(() => {
+    const saved = useAuthStore.getState().rememberedEmail;
+    if (saved) {
+      setValue("email", saved);
+      setValue("rememberEmail", true);
     }
+  }, [setValue]);
+
+  const rememberEmail = useWatch({ control, name: "rememberEmail" });
+
+  function onSubmit(values: FormValues) {
+    login(
+      { email: values.email, password: values.password },
+      {
+        onSuccess: () => {
+          setRememberedEmail(values.rememberEmail ? values.email : null);
+        },
+        onError: () => {
+          setError("root", { message: "이메일 또는 비밀번호가 올바르지 않습니다." });
+        },
+      },
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
       {/* Email */}
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">이메일</Label>
@@ -49,14 +67,13 @@ export function LoginForm() {
           id="email"
           type="email"
           placeholder="example@email.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
           aria-invalid={!!errors.email}
           aria-describedby={errors.email ? "email-error" : undefined}
+          {...register("email")}
         />
         {errors.email && (
           <p id="email-error" className="text-destructive text-xs">
-            {errors.email}
+            {errors.email.message}
           </p>
         )}
       </div>
@@ -65,31 +82,22 @@ export function LoginForm() {
       <div className="flex flex-col gap-1.5">
         <div className="flex items-center justify-between">
           <Label htmlFor="password">비밀번호</Label>
-          <Button
-            type="button"
-            variant="link"
-            size="sm"
-            className="h-auto p-0 text-xs text-muted-foreground cursor-pointer"
-            onClick={() => {
-              // TODO: navigate to find password
-            }}
-          >
-            비밀번호 찾기
-          </Button>
         </div>
         <Input
           id="password"
           type="password"
           placeholder="8자 이상 입력해 주세요"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
           aria-invalid={!!errors.password}
           aria-describedby={errors.password ? "password-error" : undefined}
+          {...register("password")}
         />
         {errors.password && (
           <p id="password-error" className="text-destructive text-xs">
-            {errors.password}
+            {errors.password.message}
           </p>
+        )}
+        {errors.root && (
+          <p className="text-destructive text-xs">{errors.root.message}</p>
         )}
       </div>
 
@@ -98,8 +106,8 @@ export function LoginForm() {
         <Checkbox
           id="remember-email"
           checked={rememberEmail}
-          onCheckedChange={(checked) => setRememberEmail(checked === true)}
-          className='cursor-pointer'
+          onCheckedChange={(checked) => setValue("rememberEmail", checked === true)}
+          className="cursor-pointer"
         />
         <Label htmlFor="remember-email" className="cursor-pointer font-normal">
           이메일 기억하기
@@ -107,8 +115,13 @@ export function LoginForm() {
       </div>
 
       {/* Submit */}
-      <Button type="submit" className="w-full cursor-pointer" size="lg" onClick={()=>router.push(ROUTES.dashboard.root)}>
-        로그인
+      <Button
+        type="submit"
+        className="w-full cursor-pointer"
+        size="lg"
+        disabled={isPending}
+      >
+        {isPending ? "로그인 중..." : "로그인"}
       </Button>
     </form>
   );
