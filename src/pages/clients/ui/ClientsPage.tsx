@@ -31,7 +31,7 @@ import {
 import { ROUTES } from "@/src/shared/config";
 import { SearchInput } from "@/src/shared/ui";
 import { useDebounce, usePagination } from "@/src/shared/lib/hooks";
-import { useClients } from "@/src/features/clients";
+import { useClients, useCreateClient } from "@/src/features/clients";
 
 const PAGE_SIZE = 10;
 
@@ -42,6 +42,19 @@ export function ClientsPage() {
   const { page, goPrev, goNext, reset } = usePagination();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", manager: "", contact: "" });
+  const { mutate: createClient, isPending } = useCreateClient();
+
+  const handleSubmit = () => {
+    createClient(
+      { name: form.name, contactName: form.manager, contactPhone: form.contact },
+      {
+        onSuccess: () => {
+          setOpen(false);
+          setForm({ name: "", manager: "", contact: "" });
+        },
+      }
+    );
+  };
 
   const { data = [], isLoading } = useClients({
     name: debouncedSearch || undefined,
@@ -67,6 +80,7 @@ export function ClientsPage() {
         </Button>
       </div>
 
+      {/* 거래처 등록 dialog */}
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
@@ -99,7 +113,7 @@ export function ClientsPage() {
               <Label htmlFor='client-contact'>연락처</Label>
               <Input
                 id='client-contact'
-                placeholder='연락처 입력'
+                placeholder={`'-'는 제외하고 입력해주세요.`}
                 value={form.contact}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, contact: e.target.value }))
@@ -115,8 +129,8 @@ export function ClientsPage() {
             >
               취소
             </Button>
-            <Button onClick={() => setOpen(false)} className='cursor-pointer'>
-              등록
+            <Button onClick={handleSubmit} disabled={isPending} className='cursor-pointer'>
+              {isPending ? '등록 중...' : '등록'}
             </Button>
           </DialogFooter>
         </DialogContent>

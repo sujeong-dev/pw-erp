@@ -26,7 +26,7 @@ function redirectToLogin() {
 export const apiClient = ky.create({
   prefixUrl: baseUrl,
   retry: {
-    limit: 2,
+    limit: 3,
     statusCodes: [408, 500, 502, 503, 504], // 401 제외 — afterResponse 훅에서 직접 처리
   },
   hooks: {
@@ -34,11 +34,11 @@ export const apiClient = ky.create({
       (request) => {
         if (isRedirecting) return;
         const { accessToken, refreshToken } = useAuthStore.getState();
-        if (!accessToken && !refreshToken) {
-          // 두 토큰 모두 없으면 서버 요청 없이 즉시 redirect
-          redirectToLogin();
-          throw new DOMException('No auth tokens', 'AbortError');
-        }
+        // if (!accessToken && !refreshToken) {
+        //   // 두 토큰 모두 없으면 서버 요청 없이 즉시 redirect
+        //   redirectToLogin();
+        //   throw new DOMException('No auth tokens', 'AbortError');
+        // }
         if (accessToken) {
           request.headers.set('Authorization', `Bearer ${accessToken}`);
         }
