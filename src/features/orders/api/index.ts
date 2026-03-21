@@ -34,6 +34,12 @@ export async function createOrder(body: CreateOrderRequest): Promise<Order> {
   return apiClient.post('api/sales', { json: body }).json<Order>();
 }
 
+export type DeleteOrderResponse = { deletedId: string };
+
 export async function updateOrder(id: string, body: UpdateOrderRequest): Promise<Order> {
   return apiClient.patch(`api/sales/${id}`, { json: body }).json<Order>();
+}
+
+export async function deleteOrder(id: string): Promise<DeleteOrderResponse> {
+  return apiClient.delete(`api/sales/${id}`).json<DeleteOrderResponse>();
 }

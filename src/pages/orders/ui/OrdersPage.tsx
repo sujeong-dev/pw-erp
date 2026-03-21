@@ -25,8 +25,8 @@ import {
 import { TX_STATUS, statusVariant } from "@/src/shared/constants";
 import { ROUTES } from "@/src/shared/config";
 import type { TxStatus } from "@/src/shared/constants";
-import { DateFilter, SearchInput } from "@/src/shared/ui";
-import { CreateOrderDialog, EditOrderDialog } from "@/src/features/orders";
+import { DateFilter, SearchInput, ConfirmDialog } from "@/src/shared/ui";
+import { CreateOrderDialog, EditOrderDialog, useDeleteOrder } from "@/src/features/orders";
 
 type Order = {
   id: string;
@@ -73,6 +73,9 @@ export function OrdersPage() {
   const [page, setPage] = useState(1);
 
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
+  const [deleteOrderId, setDeleteOrderId] = useState<string | null>(null);
+
+  const { mutate: deleteOrder, isPending: isDeleting } = useDeleteOrder();
 
   const filtered = mockOrders.filter((o) => {
     const matchClient = o.client.includes(search);
@@ -91,6 +94,11 @@ export function OrdersPage() {
 
   function handleEditClose() {
     setEditingOrder(null);
+  }
+
+  function handleDelete() {
+    if (!deleteOrderId) return;
+    deleteOrder(deleteOrderId, { onSuccess: () => setDeleteOrderId(null) });
   }
 
   // Map mock Order to the shape EditOrderDialog expects
@@ -115,6 +123,16 @@ export function OrdersPage() {
       </div>
 
       <EditOrderDialog order={editOrderProps} onClose={handleEditClose} />
+      <ConfirmDialog
+        open={!!deleteOrderId}
+        onOpenChange={(v) => !v && setDeleteOrderId(null)}
+        title="주문 취소"
+        description="취소된 주문은 복구할 수 없습니다. 정말 취소하시겠습니까?"
+        confirmLabel="삭제"
+        cancelLabel="취소"
+        onConfirm={handleDelete}
+        isPending={isDeleting}
+      />
 
       {/* Filters */}
       <div className='flex items-center gap-3'>
@@ -181,6 +199,7 @@ export function OrdersPage() {
                         variant='outline'
                         size='sm'
                         className='cursor-pointer'
+                        onClick={() => setDeleteOrderId(order.id)}
                       >
                         취소
                       </Button>
