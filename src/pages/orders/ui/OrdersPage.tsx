@@ -126,10 +126,10 @@ export function OrdersPage() {
       <ConfirmDialog
         open={!!deleteOrderId}
         onOpenChange={(v) => !v && setDeleteOrderId(null)}
-        title="주문 취소"
-        description="취소된 주문은 복구할 수 없습니다. 정말 취소하시겠습니까?"
-        confirmLabel="삭제"
-        cancelLabel="취소"
+        title='정말 취소하시겠습니까?'
+        description='취소된 주문은 복구할 수 없습니다.'
+        confirmLabel='삭제'
+        cancelLabel='취소'
         onConfirm={handleDelete}
         isPending={isDeleting}
       />
@@ -138,13 +138,19 @@ export function OrdersPage() {
       <div className='flex items-center gap-3'>
         <SearchInput
           value={search}
-          onChange={(v) => { setSearch(v); resetPage(); }}
+          onChange={(v) => {
+            setSearch(v);
+            resetPage();
+          }}
           placeholder='거래처 검색'
           className='w-56'
         />
         <DateFilter
           value={dateFilter}
-          onChange={(d) => { setDateFilter(d); resetPage(); }}
+          onChange={(d) => {
+            setDateFilter(d);
+            resetPage();
+          }}
           placeholder='주문 날짜'
         />
       </div>
@@ -167,8 +173,10 @@ export function OrdersPage() {
             {paged.map((order) => (
               <TableRow
                 key={order.id}
-                className="cursor-pointer"
-                onClick={() => router.push(ROUTES.dashboard.orderDetail(order.id))}
+                className='cursor-pointer'
+                onClick={() =>
+                  router.push(ROUTES.dashboard.orderDetail(order.id))
+                }
               >
                 <TableCell className='text-muted-foreground'>
                   {order.orderDate}
@@ -220,7 +228,11 @@ export function OrdersPage() {
               <PaginationPrevious
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 aria-disabled={page === 1}
-                className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                className={
+                  page === 1
+                    ? 'pointer-events-none opacity-50'
+                    : 'cursor-pointer'
+                }
               />
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, i) => (
@@ -238,7 +250,11 @@ export function OrdersPage() {
               <PaginationNext
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 aria-disabled={page === totalPages}
-                className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                className={
+                  page === totalPages
+                    ? 'pointer-events-none opacity-50'
+                    : 'cursor-pointer'
+                }
               />
             </PaginationItem>
           </PaginationContent>
