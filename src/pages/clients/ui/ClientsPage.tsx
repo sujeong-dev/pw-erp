@@ -29,9 +29,9 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { ROUTES } from "@/src/shared/config";
-import { SearchInput } from "@/src/shared/ui";
+import { SearchInput, ConfirmDialog } from "@/src/shared/ui";
 import { useDebounce, usePagination } from "@/src/shared/lib/hooks";
-import { useClients, useCreateClient } from "@/src/features/clients";
+import { useClients, useCreateClient, useUpdateClient, useDeleteClient, type Client } from "@/src/features/clients";
 
 const PAGE_SIZE = 10;
 
@@ -43,6 +43,31 @@ export function ClientsPage() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState({ name: "", manager: "", contact: "" });
   const { mutate: createClient, isPending } = useCreateClient();
+
+  const [editClient, setEditClient] = useState<Client | null>(null);
+  const [editForm, setEditForm] = useState({ name: "", manager: "", contact: "" });
+  const { mutate: updateClient, isPending: isUpdating } = useUpdateClient();
+
+  const [deleteClientId, setDeleteClientId] = useState<string | null>(null);
+  const { mutate: deleteClient, isPending: isDeleting } = useDeleteClient();
+
+  const openEdit = (client: Client) => {
+    setEditClient(client);
+    setEditForm({ name: client.name, manager: client.contactName, contact: client.contactPhone });
+  };
+
+  const handleUpdate = () => {
+    if (!editClient) return;
+    updateClient(
+      { id: editClient.id, body: { name: editForm.name, contactName: editForm.manager, contactPhone: editForm.contact } },
+      { onSuccess: () => setEditClient(null) }
+    );
+  };
+
+  const handleDelete = () => {
+    if (!deleteClientId) return;
+    deleteClient(deleteClientId, { onSuccess: () => setDeleteClientId(null) });
+  };
 
   const handleSubmit = () => {
     createClient(
@@ -136,6 +161,64 @@ export function ClientsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* 거래처 수정 dialog */}
+      <Dialog open={!!editClient} onOpenChange={(v) => !v && setEditClient(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>거래처 수정</DialogTitle>
+          </DialogHeader>
+          <div className='flex flex-col gap-4 py-2'>
+            <div className='flex flex-col gap-1.5'>
+              <Label htmlFor='edit-name'>거래처명</Label>
+              <Input
+                id='edit-name'
+                placeholder='거래처명 입력'
+                value={editForm.name}
+                onChange={(e) => setEditForm((f) => ({ ...f, name: e.target.value }))}
+              />
+            </div>
+            <div className='flex flex-col gap-1.5'>
+              <Label htmlFor='edit-manager'>담당자</Label>
+              <Input
+                id='edit-manager'
+                placeholder='담당자 이름 입력'
+                value={editForm.manager}
+                onChange={(e) => setEditForm((f) => ({ ...f, manager: e.target.value }))}
+              />
+            </div>
+            <div className='flex flex-col gap-1.5'>
+              <Label htmlFor='edit-contact'>연락처</Label>
+              <Input
+                id='edit-contact'
+                placeholder={`'-'는 제외하고 입력해주세요.`}
+                value={editForm.contact}
+                onChange={(e) => setEditForm((f) => ({ ...f, contact: e.target.value }))}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant='outline' onClick={() => setEditClient(null)} className='cursor-pointer'>
+              취소
+            </Button>
+            <Button onClick={handleUpdate} disabled={isUpdating} className='cursor-pointer'>
+              {isUpdating ? '수정 중...' : '수정'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 거래처 삭제 confirm dialog */}
+      <ConfirmDialog
+        open={!!deleteClientId}
+        onOpenChange={(v) => !v && setDeleteClientId(null)}
+        title='거래처 삭제'
+        description='삭제된 거래처는 복구할 수 없습니다. 정말 삭제하시겠습니까?'
+        confirmLabel='삭제'
+        cancelLabel='취소'
+        onConfirm={handleDelete}
+        isPending={isDeleting}
+      />
+
       <SearchInput
         value={search}
         onChange={(v: string) => setSearch(v)}
@@ -150,6 +233,7 @@ export function ClientsPage() {
             <TableHead>거래처명</TableHead>
             <TableHead>최근 거래일</TableHead>
             <TableHead className='text-right'>미수금 잔액</TableHead>
+            <TableHead />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -160,6 +244,7 @@ export function ClientsPage() {
                   <TableCell><div className="h-4 w-36 rounded bg-muted animate-pulse" /></TableCell>
                   <TableCell><div className="h-4 w-24 rounded bg-muted animate-pulse" /></TableCell>
                   <TableCell className="text-right"><div className="h-4 w-20 rounded bg-muted animate-pulse ml-auto" /></TableCell>
+                  <TableCell />
                 </TableRow>
               ))
             : data.map((client) => (
@@ -179,6 +264,26 @@ export function ClientsPage() {
                   </TableCell>
                   <TableCell className='text-destructive font-medium text-right'>
                     {client.totalBalance.toLocaleString('ko-KR')}원
+                  </TableCell>
+                  <TableCell className='text-right'>
+                    <div className='flex justify-end gap-1' onClick={(e) => e.stopPropagation()}>
+                      <Button
+                        size='sm'
+                        variant='ghost'
+                        className='cursor-pointer'
+                        onClick={() => openEdit(client)}
+                      >
+                        수정
+                      </Button>
+                      <Button
+                        size='sm'
+                        variant='ghost'
+                        className='cursor-pointer text-destructive hover:text-destructive'
+                        onClick={() => setDeleteClientId(client.id)}
+                      >
+                        삭제
+                      </Button>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

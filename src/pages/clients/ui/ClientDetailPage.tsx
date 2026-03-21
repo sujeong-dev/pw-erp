@@ -39,15 +39,7 @@ import { ROUTES } from "@/src/shared/config";
 import { TX_STATUS, TX_TYPE, CREDIT_TYPE, statusVariant } from "@/src/shared/constants";
 import type { TxStatus, TxType, CreditType } from "@/src/shared/constants";
 import { DateFilter, SelectFilter } from "@/src/shared/ui";
-
-type ClientDetail = {
-  name: string;
-  ceo: string;
-  contact: string;
-  totalOrders: number;
-  totalPayments: number;
-  unpaidBalance: number;
-};
+import { useClientSummary } from "@/src/features/clients";
 
 type Transaction = {
   date: string;
@@ -61,14 +53,6 @@ type Transaction = {
   tons?: number;
   unitPrice?: number;
   memo?: string;
-};
-
-const mockClientDetails: Record<string, ClientDetail> = {
-  C001: { name: "한국무역(주)", ceo: "김철수", contact: "02-1234-5678", totalOrders: 12500000, totalPayments: 11000000, unpaidBalance: 1500000 },
-  C002: { name: "대성산업", ceo: "이영희", contact: "031-234-5678", totalOrders: 8200000, totalPayments: 8200000, unpaidBalance: 0 },
-  C003: { name: "서울전자(주)", ceo: "박민준", contact: "02-9876-5432", totalOrders: 5400000, totalPayments: 5080000, unpaidBalance: 320000 },
-  C004: { name: "미래물산", ceo: "최지원", contact: "051-345-6789", totalOrders: 6700000, totalPayments: 5830000, unpaidBalance: 870000 },
-  C005: { name: "동아상사", ceo: "정수진", contact: "032-456-7890", totalOrders: 3100000, totalPayments: 3100000, unpaidBalance: 0 },
 };
 
 const mockTransactions: Transaction[] = [
@@ -98,7 +82,7 @@ export function ClientDetailPage({ id }: { id: string }) {
   const [typeFilter, setTypeFilter] = useState<"all" | TxType>("all");
   const [detailTx, setDetailTx] = useState<Transaction | null>(null);
 
-  const client = mockClientDetails[id] ?? mockClientDetails["C001"];
+  const { data: summary, isLoading: summaryLoading } = useClientSummary(id);
 
   const filtered = mockTransactions.filter((tx) => {
     const matchDate = !date || tx.date === format(date, "yyyy-MM-dd");
@@ -117,7 +101,7 @@ export function ClientDetailPage({ id }: { id: string }) {
           거래처 관리
         </Link>
         <ChevronRight className="size-4" />
-        <span className="text-foreground font-medium">{client.name}</span>
+        <span className="text-foreground font-medium">{id}</span>
       </nav>
 
       {/* Summary Cards */}
@@ -127,7 +111,10 @@ export function ClientDetailPage({ id }: { id: string }) {
             <CardTitle className="text-sm font-medium text-muted-foreground">총 주문액</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{client.totalOrders.toLocaleString("ko-KR")}원</p>
+            {summaryLoading
+              ? <div className="h-8 w-32 rounded bg-muted animate-pulse" />
+              : <p className="text-2xl font-bold">{summary?.totalSaleAmount.toLocaleString("ko-KR")}원</p>
+            }
           </CardContent>
         </Card>
         <Card>
@@ -135,7 +122,10 @@ export function ClientDetailPage({ id }: { id: string }) {
             <CardTitle className="text-sm font-medium text-muted-foreground">총 입금액</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold">{client.totalPayments.toLocaleString("ko-KR")}원</p>
+            {summaryLoading
+              ? <div className="h-8 w-32 rounded bg-muted animate-pulse" />
+              : <p className="text-2xl font-bold">{summary?.totalPaymentAmount.toLocaleString("ko-KR")}원</p>
+            }
           </CardContent>
         </Card>
         <Card>
@@ -143,33 +133,13 @@ export function ClientDetailPage({ id }: { id: string }) {
             <CardTitle className="text-sm font-medium text-muted-foreground">미수금 잔액</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-2xl font-bold text-destructive">{client.unpaidBalance.toLocaleString("ko-KR")}원</p>
+            {summaryLoading
+              ? <div className="h-8 w-32 rounded bg-muted animate-pulse" />
+              : <p className="text-2xl font-bold text-destructive">{summary?.totalBalance.toLocaleString("ko-KR")}원</p>
+            }
           </CardContent>
         </Card>
       </div>
-
-      {/* Client Info */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base">거래처 정보</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <dl className="grid grid-cols-3 gap-4 text-sm">
-            <div className="flex flex-col gap-1">
-              <dt className="text-muted-foreground">거래처명</dt>
-              <dd className="font-medium">{client.name}</dd>
-            </div>
-            <div className="flex flex-col gap-1">
-              <dt className="text-muted-foreground">대표자</dt>
-              <dd className="font-medium">{client.ceo}</dd>
-            </div>
-            <div className="flex flex-col gap-1">
-              <dt className="text-muted-foreground">연락처</dt>
-              <dd className="font-medium">{client.contact}</dd>
-            </div>
-          </dl>
-        </CardContent>
-      </Card>
 
       {/* Transaction Ledger */}
       <div className="flex flex-col gap-4">

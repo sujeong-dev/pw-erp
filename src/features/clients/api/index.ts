@@ -34,3 +34,23 @@ export async function getClients(params: GetClientsParams): Promise<Client[]> {
 export async function createClient(body: CreateClientRequest): Promise<Client> {
   return apiClient.post('api/clients', { json: body }).json<Client>();
 }
+
+export async function updateClient(id: string, body: CreateClientRequest): Promise<Client> {
+  return apiClient.patch(`api/clients/${id}`, { json: body }).json<Client>();
+}
+
+export type DeleteClientResponse = { deletedId: string };
+
+export async function deleteClient(id: string): Promise<DeleteClientResponse> {
+  return apiClient.delete(`api/clients/${id}`).json<DeleteClientResponse>();
+}
+
+export type ClientSummary = {
+  totalSaleAmount: number;
+  totalPaymentAmount: number;
+  totalBalance: number;
+};
+
+export async function getClientSummary(id: string): Promise<ClientSummary> {
+  return apiClient.get(`api/clients/${id}/summary`).json<ClientSummary>();
+}
