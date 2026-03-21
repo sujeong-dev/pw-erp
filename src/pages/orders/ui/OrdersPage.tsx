@@ -3,33 +3,9 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { format } from "date-fns";
-import { CalendarIcon, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Table,
   TableBody,
@@ -50,12 +26,7 @@ import { TX_STATUS, statusVariant } from "@/src/shared/constants";
 import { ROUTES } from "@/src/shared/config";
 import type { TxStatus } from "@/src/shared/constants";
 import { DateFilter, SearchInput } from "@/src/shared/ui";
-
-const mockClients = [
-  "한국무역(주)", "대성산업", "서울전자(주)", "미래물산", "동아상사",
-  "태양무역", "국제기업(주)", "한빛산업", "성진상사", "우리물산",
-  "현대유통", "신한기업",
-];
+import { CreateOrderDialog, EditOrderDialog } from "@/src/features/orders";
 
 type Order = {
   id: string;
@@ -95,22 +66,13 @@ function formatAmount(amount: number): string {
 
 const PAGE_SIZE = 10;
 
-const emptyForm = { client: "", orderDate: undefined as Date | undefined, item: "", tons: "", unitPrice: "", memo: "" };
-
 export function OrdersPage() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
   const [page, setPage] = useState(1);
-  const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ ...emptyForm });
-  const [formDate, setFormDate] = useState<Date | undefined>(undefined);
-  const [formDateOpen, setFormDateOpen] = useState(false);
 
   const [editingOrder, setEditingOrder] = useState<Order | null>(null);
-  const [editForm, setEditForm] = useState({ ...emptyForm });
-  const [editFormDate, setEditFormDate] = useState<Date | undefined>(undefined);
-  const [editFormDateOpen, setEditFormDateOpen] = useState(false);
 
   const filtered = mockOrders.filter((o) => {
     const matchClient = o.client.includes(search);
@@ -123,310 +85,48 @@ export function OrdersPage() {
 
   function resetPage() { setPage(1); }
 
-  function handleOpenChange(v: boolean) {
-    setOpen(v);
-    if (!v) {
-      setForm({ ...emptyForm });
-      setFormDate(undefined);
-    }
-  }
-
   function handleEditOpen(order: Order) {
     setEditingOrder(order);
-    setEditForm({ client: order.client, item: order.item, tons: String(order.tons), unitPrice: String(order.unitPrice), orderDate: undefined, memo: "" });
-    setEditFormDate(new Date(order.orderDate));
   }
 
   function handleEditClose() {
     setEditingOrder(null);
-    setEditForm({ ...emptyForm });
-    setEditFormDate(undefined);
   }
 
-  const tons = parseFloat(form.tons) || 0;
-  const unitPrice = parseFloat(form.unitPrice) || 0;
-  const totalAmount = tons > 0 && unitPrice > 0 ? calcTotal(tons, unitPrice) : null;
-
-  const editTons = parseFloat(editForm.tons) || 0;
-  const editUnitPrice = parseFloat(editForm.unitPrice) || 0;
-  const editTotalAmount = editTons > 0 && editUnitPrice > 0 ? calcTotal(editTons, editUnitPrice) : null;
+  // Map mock Order to the shape EditOrderDialog expects
+  const editOrderProps = editingOrder
+    ? {
+        id: editingOrder.id,
+        clientId: "",
+        date: editingOrder.orderDate,
+        itemName: editingOrder.item,
+        tonnage: editingOrder.tons,
+        unitPrice: editingOrder.unitPrice,
+        memo: editingOrder.memo,
+      }
+    : null;
 
   return (
     <main className='flex flex-col gap-6 p-8'>
       {/* Header */}
       <div className='flex items-center justify-between'>
         <h1 className='text-2xl font-semibold'>매출 내역</h1>
-        <Button onClick={() => setOpen(true)} className='cursor-pointer'>
-          <Plus className='size-4' />
-          주문 등록
-        </Button>
+        <CreateOrderDialog />
       </div>
 
-      {/* Register Dialog */}
-      <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>주문 등록</DialogTitle>
-          </DialogHeader>
-          <div className='flex flex-col gap-4 py-2'>
-            <div className='flex flex-col gap-1.5'>
-              <Label>거래처</Label>
-              <Select
-                value={form.client}
-                onValueChange={(v) => setForm((f) => ({ ...f, client: v }))}
-              >
-                <SelectTrigger className='cursor-pointer'>
-                  <SelectValue placeholder='거래처 선택' />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockClients.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label>주문 날짜</Label>
-              <Popover open={formDateOpen} onOpenChange={setFormDateOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant='outline'
-                    className='justify-start gap-2 cursor-pointer'
-                  >
-                    <CalendarIcon className='size-4' />
-                    {formDate ? format(formDate, 'yyyy-MM-dd') : '날짜 선택'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className='w-auto p-0'>
-                  <Calendar
-                    mode='single'
-                    selected={formDate}
-                    onSelect={(d) => {
-                      setFormDate(d);
-                      setFormDateOpen(false);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label htmlFor='order-item'>품목</Label>
-              <Input
-                id='order-item'
-                placeholder='품목 입력'
-                value={form.item}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, item: e.target.value }))
-                }
-              />
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label htmlFor='order-tons'>톤수</Label>
-              <Input
-                id='order-tons'
-                type='number'
-                placeholder='톤수 입력'
-                value={form.tons}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, tons: e.target.value }))
-                }
-              />
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label htmlFor='order-unit-price'>단가</Label>
-              <Input
-                id='order-unit-price'
-                type='number'
-                placeholder='단가 입력'
-                value={form.unitPrice}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, unitPrice: e.target.value }))
-                }
-              />
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label htmlFor='order-memo'>메모</Label>
-              <Textarea
-                id='order-memo'
-                placeholder='메모 입력'
-                value={form.memo}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, memo: e.target.value }))
-                }
-              />
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label>합계 금액 (VAT 10% 포함)</Label>
-              <div className='flex h-9 items-center rounded-md border bg-muted px-3 text-sm text-muted-foreground'>
-                {totalAmount !== null ? formatAmount(totalAmount) : '-'}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant='outline'
-              onClick={() => handleOpenChange(false)}
-              className='cursor-pointer'
-            >
-              취소
-            </Button>
-            <Button
-              onClick={() => handleOpenChange(false)}
-              className='cursor-pointer'
-            >
-              등록
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Dialog */}
-      <Dialog
-        open={editingOrder !== null}
-        onOpenChange={(v) => {
-          if (!v) handleEditClose();
-        }}
-      >
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>주문 수정</DialogTitle>
-          </DialogHeader>
-          <div className='flex flex-col gap-4 py-2'>
-            <div className='flex flex-col gap-1.5'>
-              <Label>거래처</Label>
-              <Select
-                value={editForm.client}
-                onValueChange={(v) => setEditForm((f) => ({ ...f, client: v }))}
-              >
-                <SelectTrigger className='cursor-pointer'>
-                  <SelectValue placeholder='거래처 선택' />
-                </SelectTrigger>
-                <SelectContent>
-                  {mockClients.map((c) => (
-                    <SelectItem key={c} value={c}>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label>주문 날짜</Label>
-              <Popover
-                open={editFormDateOpen}
-                onOpenChange={setEditFormDateOpen}
-              >
-                <PopoverTrigger asChild>
-                  <Button
-                    variant='outline'
-                    className='justify-start gap-2 cursor-pointer'
-                  >
-                    <CalendarIcon className='size-4' />
-                    {editFormDate
-                      ? format(editFormDate, 'yyyy-MM-dd')
-                      : '날짜 선택'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className='w-auto p-0'>
-                  <Calendar
-                    mode='single'
-                    selected={editFormDate}
-                    onSelect={(d) => {
-                      setEditFormDate(d);
-                      setEditFormDateOpen(false);
-                    }}
-                  />
-                </PopoverContent>
-              </Popover>
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label htmlFor='edit-item'>품목</Label>
-              <Input
-                id='edit-item'
-                placeholder='품목 입력'
-                value={editForm.item}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, item: e.target.value }))
-                }
-              />
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label htmlFor='edit-tons'>톤수</Label>
-              <Input
-                id='edit-tons'
-                type='number'
-                placeholder='톤수 입력'
-                value={editForm.tons}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, tons: e.target.value }))
-                }
-              />
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label htmlFor='edit-unit-price'>단가</Label>
-              <Input
-                id='edit-unit-price'
-                type='number'
-                placeholder='단가 입력'
-                value={editForm.unitPrice}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, unitPrice: e.target.value }))
-                }
-              />
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label htmlFor='edit-memo'>메모</Label>
-              <Textarea
-                id='edit-memo'
-                placeholder='메모 입력'
-                value={editForm.memo}
-                onChange={(e) =>
-                  setEditForm((f) => ({ ...f, memo: e.target.value }))
-                }
-              />
-            </div>
-            <div className='flex flex-col gap-1.5'>
-              <Label>합계 금액 (VAT 10% 포함)</Label>
-              <div className='flex h-9 items-center rounded-md border bg-muted px-3 text-sm text-muted-foreground'>
-                {editTotalAmount !== null ? formatAmount(editTotalAmount) : '-'}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant='outline'
-              onClick={handleEditClose}
-              className='cursor-pointer'
-            >
-              취소
-            </Button>
-            <Button onClick={handleEditClose} className='cursor-pointer'>
-              수정
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <EditOrderDialog order={editOrderProps} onClose={handleEditClose} />
 
       {/* Filters */}
       <div className='flex items-center gap-3'>
         <SearchInput
           value={search}
-          onChange={(v) => {
-            setSearch(v);
-            resetPage();
-          }}
+          onChange={(v) => { setSearch(v); resetPage(); }}
           placeholder='거래처 검색'
           className='w-56'
         />
-
         <DateFilter
           value={dateFilter}
-          onChange={(d) => {
-            setDateFilter(d);
-            resetPage();
-          }}
+          onChange={(d) => { setDateFilter(d); resetPage(); }}
           placeholder='주문 날짜'
         />
       </div>
@@ -501,11 +201,7 @@ export function OrdersPage() {
               <PaginationPrevious
                 onClick={() => setPage((p) => Math.max(1, p - 1))}
                 aria-disabled={page === 1}
-                className={
-                  page === 1
-                    ? 'pointer-events-none opacity-50'
-                    : 'cursor-pointer'
-                }
+                className={page === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
               />
             </PaginationItem>
             {Array.from({ length: totalPages }, (_, i) => (
@@ -523,11 +219,7 @@ export function OrdersPage() {
               <PaginationNext
                 onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                 aria-disabled={page === totalPages}
-                className={
-                  page === totalPages
-                    ? 'pointer-events-none opacity-50'
-                    : 'cursor-pointer'
-                }
+                className={page === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
               />
             </PaginationItem>
           </PaginationContent>
