@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm, useWatch, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { format } from "date-fns";
-import { CalendarIcon, Plus } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -33,6 +33,11 @@ import { useClients } from "@/src/features/clients";
 import { useCreateOrder } from "../model/useCreateOrder";
 import { orderFormSchema, type OrderFormValues } from "../model/schema";
 
+type Props = {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+}
+
 function calcTotal(tonnage: number, unitPrice: number): number {
   return Math.round(tonnage * unitPrice * 1.1);
 }
@@ -41,8 +46,7 @@ function formatAmount(amount: number): string {
   return amount.toLocaleString("ko-KR") + "원";
 }
 
-export function CreateOrderDialog() {
-  const [open, setOpen] = useState(false);
+export function CreateOrderDialog({open, setOpen}: Props) {
   const [dateOpen, setDateOpen] = useState(false);
 
   const { data: clients = [] } = useClients({});
@@ -81,18 +85,12 @@ export function CreateOrderDialog() {
     );
   }
 
-  function handleOpenChange(v: boolean) {
-    setOpen(v);
-    if (!v) reset();
+  function handleOpenChange(open: boolean) {
+    setOpen(open);
+    if (!open) reset();
   }
 
   return (
-    <>
-      <Button onClick={() => setOpen(true)} className="cursor-pointer">
-        <Plus className="size-4" />
-        주문 등록
-      </Button>
-
       <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent>
           <DialogHeader>
@@ -251,6 +249,5 @@ export function CreateOrderDialog() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
   );
 }
