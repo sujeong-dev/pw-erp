@@ -22,6 +22,13 @@ const mockItems: Order[] = [
 ];
 
 export const salesHandlers = [
+  http.get('*/api/sales/:id', ({ params }) => {
+    const { id } = params as { id: string };
+    const order = mockItems.find((o) => o.id === id);
+    if (!order) return HttpResponse.json({ message: 'Not found' }, { status: 404 });
+    return HttpResponse.json(order);
+  }),
+
   http.get('*/api/sales', ({ request }) => {
     const url = new URL(request.url);
     const code = url.searchParams.get('code') ?? '';

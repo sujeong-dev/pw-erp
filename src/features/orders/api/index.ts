@@ -71,3 +71,7 @@ export async function updateOrder(id: string, body: UpdateOrderRequest): Promise
 export async function deleteOrder(id: string): Promise<DeleteOrderResponse> {
   return apiClient.delete(`api/sales/${id}`).json<DeleteOrderResponse>();
 }
+
+export async function getOrder(id: string): Promise<Order> {
+  return apiClient.get(`api/sales/${id}`).json<Order>();
+}

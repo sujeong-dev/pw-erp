@@ -1,5 +1,7 @@
 import { OrderDetailPage } from "@/src/pages/orders/ui";
 
-export default function Page({ params }: { params: { id: string } }) {
-  return <OrderDetailPage id={params.id} />;
+export default async function Page({ params }: { params: { id: string } }) {
+  const { id } = await params;
+  
+  return <OrderDetailPage id={id} />;
 }

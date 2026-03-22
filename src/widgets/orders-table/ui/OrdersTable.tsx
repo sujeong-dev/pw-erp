@@ -12,16 +12,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { TX_STATUS, statusVariant } from "@/src/shared/constants";
+import {
+  statusVariant,
+  STATUS_DISPLAY
+} from '@/src/shared/constants';
 import { ROUTES } from "@/src/shared/config";
 import type { Order } from "@/src/features/orders";
-
-const STATUS_DISPLAY = {
-  UNPAID: TX_STATUS.UNPAID,
-  PAID: TX_STATUS.PAID,
-  PARTIAL: TX_STATUS.PARTIAL,
-  CANCEL: TX_STATUS.CANCEL,
-} as const;
 
 type Props = {
   items: Order[];

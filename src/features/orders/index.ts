@@ -1,4 +1,5 @@
 export { useOrders } from './model/useOrders';
+export { useOrder } from './model/useOrder';
 export { useCreateOrder } from './model/useCreateOrder';
 export { useUpdateOrder } from './model/useUpdateOrder';
 export { useDeleteOrder } from './model/useDeleteOrder';
@@ -9,7 +10,9 @@ export { CreateOrderDialog } from './ui/CreateOrderDialog';
 export { EditOrderDialog } from './ui/EditOrderDialog';
 export { OrdersFilters } from './ui/OrdersFilters';
 export { OrderDeleteDialog } from './ui/OrderDeleteDialog';
+export { OrderDetail } from './ui/OrderDetail';
 export { orderFormSchema } from './model/schema';
 export type { Order, GetOrdersParams, OrdersResponse, CreateOrderRequest, UpdateOrderRequest, DeleteOrderResponse } from './api';
+export type { OrderClient } from './api';
 export type { OrderFormValues } from './model/schema';
 export type { EditableOrder } from './model/useOrderEdit';

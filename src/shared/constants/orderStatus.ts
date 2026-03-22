@@ -14,6 +14,13 @@ export const statusVariant: Record<TxStatus, "default" | "secondary" | "outline"
   [TX_STATUS.CANCEL]:  "destructive",
 };
 
+export const STATUS_DISPLAY = {
+  UNPAID: TX_STATUS.UNPAID,
+  PAID: TX_STATUS.PAID,
+  PARTIAL: TX_STATUS.PARTIAL,
+  CANCEL: TX_STATUS.CANCEL,
+} as const;
+
 export const TX_TYPE = {
   SALES:   "매출",
   PAYMENT: "수금",
