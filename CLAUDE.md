@@ -17,7 +17,7 @@ pnpm lint         # Run ESLint
 - **React 19** with TypeScript
 - **Tailwind CSS v4** — uses `@theme inline` blocks in `app/globals.css`, no `tailwind.config.js`
 - **shadcn/ui** — style: `radix-mira`, base: `radix`
-- **HugeIcons** (`@hugeicons/react`) — this is the configured `iconLibrary`, not `lucide-react`
+- **lucideIcons** (`@lucide-react`) — this is the configured `iconLibrary`
 - **MCP server**: `shadcn` MCP available via `.mcp.json`
 
 ## Path Aliases
