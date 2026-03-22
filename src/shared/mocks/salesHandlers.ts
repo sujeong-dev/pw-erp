@@ -1,5 +1,8 @@
 import { http, HttpResponse } from 'msw';
-import type { Order, OrdersResponse } from '@/src/features/orders/api';
+import type { CreateOrderRequest, Order, OrdersResponse } from '@/src/features/orders/api';
+import { mockClients } from './clientHandlers';
+
+let nextOrderId = 15;
 
 const mockItems: Order[] = [
   { id: 'o-001', code: 'S-2026-001', clientId: 'c-001', client: { id: 'c-001', code: 'C-001', name: '한국무역(주)' }, userId: 'u-1', date: '2026-03-17', itemName: '철근', tonnage: 5.0, unitPrice: 800_000, totalPrice: 4_400_000, memo: '긴급 납품 요청', status: 'UNPAID', createdAt: '2026-03-17T00:00:00Z', updatedAt: '2026-03-17T00:00:00Z' },
@@ -18,7 +21,7 @@ const mockItems: Order[] = [
   { id: 'o-014', code: 'S-2026-014', clientId: 'c-002', client: { id: 'c-002', code: 'C-002', name: '대성산업' }, userId: 'u-1', date: '2026-03-02', itemName: 'H빔', tonnage: 2.8, unitPrice: 950_000, totalPrice: 2_926_000, memo: null, status: 'UNPAID', createdAt: '2026-03-02T00:00:00Z', updatedAt: '2026-03-02T00:00:00Z' },
 ];
 
-export const handlers = [
+export const salesHandlers = [
   http.get('*/api/sales', ({ request }) => {
     const url = new URL(request.url);
     const code = url.searchParams.get('code') ?? '';
@@ -30,7 +33,8 @@ export const handlers = [
 
     let filtered = mockItems;
     if (code) filtered = filtered.filter((i) => i.code.includes(code));
-    if (clientName) filtered = filtered.filter((i) => i.client.name.includes(clientName));
+    if (clientName)
+      filtered = filtered.filter((i) => i.client.name.includes(clientName));
     if (startDate) filtered = filtered.filter((i) => i.date >= startDate);
     if (endDate) filtered = filtered.filter((i) => i.date <= endDate);
 
@@ -38,7 +42,77 @@ export const handlers = [
     const totalPages = Math.max(1, Math.ceil(totalElements / pageSize));
     const items = filtered.slice((page - 1) * pageSize, page * pageSize);
 
-    const response: OrdersResponse = { totalPages, totalElements, size: pageSize, page, items };
+    const response: OrdersResponse = {
+      totalPages,
+      totalElements,
+      size: pageSize,
+      page,
+      items,
+    };
     return HttpResponse.json(response);
+  }),
+
+  http.post('*/api/sales', async ({ request }) => {
+    const body = await request.json() as CreateOrderRequest;
+    const client = mockClients.find((c) => c.id === body.clientId);
+    if (!client) return HttpResponse.json({ message: 'Client not found' }, { status: 404 });
+
+    const id = `o-${String(nextOrderId).padStart(3, '0')}`;
+    const code = `S-2026-${String(nextOrderId++).padStart(3, '0')}`;
+    const now = new Date().toISOString();
+    const newOrder: Order = {
+      id,
+      code,
+      clientId: body.clientId,
+      client: { id: client.id, code: client.code, name: client.name },
+      userId: 'u-1',
+      date: body.date,
+      itemName: body.itemName,
+      tonnage: body.tonnage,
+      unitPrice: body.unitPrice,
+      totalPrice: Math.round(body.tonnage * body.unitPrice * 1.1),
+      memo: body.memo ?? null,
+      status: 'UNPAID',
+      createdAt: now,
+      updatedAt: now,
+    };
+    mockItems.unshift(newOrder);
+    return HttpResponse.json(newOrder, { status: 201 });
+  }),
+
+  http.patch('*/api/sales/:id', async ({ params, request }) => {
+    const { id } = params as { id: string };
+    const body = await request.json() as CreateOrderRequest;
+    const index = mockItems.findIndex((o) => o.id === id);
+    if (index === -1) return HttpResponse.json({ message: 'Not found' }, { status: 404 });
+
+    const existing = mockItems[index];
+    const client = body.clientId !== existing.clientId
+      ? mockClients.find((c) => c.id === body.clientId)
+      : existing.client;
+    if (!client) return HttpResponse.json({ message: 'Client not found' }, { status: 404 });
+
+    mockItems[index] = {
+      ...existing,
+      clientId: body.clientId,
+      client: 'id' in client ? { id: client.id, code: client.code, name: client.name } : client,
+      date: body.date,
+      itemName: body.itemName,
+      tonnage: body.tonnage,
+      unitPrice: body.unitPrice,
+      totalPrice: Math.round(body.tonnage * body.unitPrice * 1.1),
+      memo: body.memo ?? null,
+      updatedAt: new Date().toISOString(),
+    };
+    return HttpResponse.json(mockItems[index]);
+  }),
+
+  http.delete('*/api/sales/:id', ({ params }) => {
+    const { id } = params as { id: string };
+    const index = mockItems.findIndex((o) => o.id === id);
+    if (index === -1) return HttpResponse.json({ message: 'Not found' }, { status: 404 });
+
+    mockItems.splice(index, 1);
+    return HttpResponse.json({ deletedId: id });
   }),
 ];
