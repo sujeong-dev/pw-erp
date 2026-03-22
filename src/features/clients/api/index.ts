@@ -23,12 +23,20 @@ export type CreateClientRequest = {
   contactPhone: string;
 };
 
-export async function getClients(params: GetClientsParams): Promise<Client[]> {
+export type ClientsResponse = {
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  page: number;
+  items: Client[];
+};
+
+export async function getClients(params: GetClientsParams): Promise<ClientsResponse> {
   const searchParams: Record<string, string> = {};
   if (params.name) searchParams.name = params.name;
   if (params.page !== undefined) searchParams.page = String(params.page);
   if (params.pageSize !== undefined) searchParams.pageSize = String(params.pageSize);
-  return apiClient.get('api/clients', { searchParams }).json<Client[]>();
+  return apiClient.get('api/clients', { searchParams }).json<ClientsResponse>();
 }
 
 export async function createClient(body: CreateClientRequest): Promise<Client> {

@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { Client } from '@/src/features/clients/api';
+import type { Client, ClientsResponse } from '@/src/features/clients/api';
 
 export const mockClients: Client[] = [
   { id: 'c-001', code: 'C-001', name: '한국무역(주)', contactName: '김철수', contactPhone: '010-1234-5678', totalBalance: 8_800_000, lastSaleDate: '2026-03-17', createdAt: '2025-01-10T00:00:00Z' },
@@ -28,8 +28,11 @@ export const clientHandlers = [
     let filtered = mockClients;
     if (name) filtered = filtered.filter((c) => c.name.includes(name));
 
+    const totalElements = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(totalElements / pageSize));
     const items = filtered.slice((page - 1) * pageSize, page * pageSize);
-    return HttpResponse.json(items);
+    const response: ClientsResponse = { totalPages, totalElements, size: pageSize, page, items };
+    return HttpResponse.json(response);
   }),
 
   http.post('*/api/clients', async ({ request }) => {
