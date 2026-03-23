@@ -26,6 +26,18 @@ export type GetPaymentsParams = {
   pageSize?: number;
 };
 
+export type CreatePaymentRequest = {
+  clientId: string;
+  date: string;
+  amount: number;
+  method: 'CASH' | 'NOTE';
+  memo?: string;
+};
+
+export async function createPayment(body: CreatePaymentRequest): Promise<Payment> {
+  return apiClient.post('api/payments', { json: body }).json<Payment>();
+}
+
 export async function getPayments(params: GetPaymentsParams): Promise<PaymentsResponse> {
   const searchParams: Record<string, string> = {};
   if (params.creditType) searchParams.creditType = params.creditType;

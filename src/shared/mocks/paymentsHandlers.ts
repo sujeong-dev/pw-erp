@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
-import type { Payment } from '@/src/features/payments';
+import type { Payment, CreatePaymentRequest } from '@/src/features/payments';
+import { mockClients } from './clientHandlers';
 
 export const mockPayments: Payment[] = [
   { id: 'pay-001', creditType: 'DEPOSIT', date: '2026-03-17T00:00:00.000Z', clientName: '한국무역(주)', amount: 4_400_000, method: 'CASH' },
@@ -38,5 +39,20 @@ export const paymentHandlers = [
     const totalPages = Math.max(1, Math.ceil(totalElements / pageSize));
     const items = filtered.slice((page - 1) * pageSize, page * pageSize);
     return HttpResponse.json({ totalPages, totalElements, size: pageSize, page, items });
+  }),
+
+  http.post('*/api/payments', async ({ request }) => {
+    const body = await request.json() as CreatePaymentRequest;
+    const client = mockClients.find((c) => c.id === body.clientId);
+    const newPayment: Payment = {
+      id: `pay-${String(mockPayments.length + 1).padStart(3, '0')}`,
+      creditType: 'DEPOSIT',
+      date: new Date(body.date).toISOString(),
+      clientName: client?.name ?? body.clientId,
+      amount: body.amount,
+      method: body.method,
+    };
+    mockPayments.push(newPayment);
+    return HttpResponse.json(newPayment, { status: 201 });
   }),
 ];

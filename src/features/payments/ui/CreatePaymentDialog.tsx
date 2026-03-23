@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { useClients } from '@/src/features/clients';
+import { useCreatePayment } from '../model/useCreatePayment';
 
 type Props = {
   open: boolean;
@@ -44,12 +45,30 @@ export function CreatePaymentDialog({ open, setOpen }: Props) {
   const { data } = useClients({});
   const clients = data?.items ?? [];
 
+  const { mutate, isPending } = useCreatePayment();
+
   function handleOpenChange(v: boolean) {
     setOpen(v);
     if (!v) {
       setForm({ ...emptyForm });
       setDate(undefined);
     }
+  }
+
+  const isValid = !!form.clientId && !!date && !!form.amount && !!form.method;
+
+  function handleSubmit() {
+    if (!isValid) return;
+    mutate(
+      {
+        clientId: form.clientId,
+        date: format(date!, 'yyyy-MM-dd'),
+        amount: Number(form.amount),
+        method: form.method as 'CASH' | 'NOTE',
+        memo: form.memo || undefined,
+      },
+      { onSuccess: () => handleOpenChange(false) },
+    );
   }
 
   return (
@@ -126,8 +145,8 @@ export function CreatePaymentDialog({ open, setOpen }: Props) {
           <Button variant='outline' onClick={() => handleOpenChange(false)} className='cursor-pointer'>
             취소
           </Button>
-          <Button onClick={() => handleOpenChange(false)} className='cursor-pointer'>
-            등록
+          <Button onClick={handleSubmit} disabled={!isValid || isPending} className='cursor-pointer'>
+            {isPending ? '등록 중...' : '등록'}
           </Button>
         </DialogFooter>
       </DialogContent>
