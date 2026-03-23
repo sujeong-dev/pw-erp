@@ -18,7 +18,7 @@ import { OrdersTable } from '@/src/widgets/orders-table/ui';
 
 const PAGE_SIZE = 10;
 
-export function OrdersPage() {
+export function OrderPage() {
   const {
     codeSearch,
     setCodeSearch,

@@ -18,7 +18,7 @@ import { ClientsTable } from '@/src/widgets/clients-table';
 
 const PAGE_SIZE = 10;
 
-export function ClientsPage() {
+export function ClientPage() {
   const { search, setSearch, debouncedSearch } = useClientsSearch();
   const { page, setPage, reset } = usePagination();
 
@@ -32,9 +32,15 @@ export function ClientsPage() {
   const totalPages = data?.totalPages ?? 1;
   const currentPage = data?.page ?? 1;
 
-  const { isRegisterModalOpen, setIsRegisterModalOpen, editingClient, handleEditOpen, handleEditClose } =
-    useClientEdit();
-  const { deleteClientId, setDeleteClientId, isDeleting, handleDelete } = useClientDeleteDialog();
+  const {
+    isRegisterModalOpen,
+    setIsRegisterModalOpen,
+    editingClient,
+    handleEditOpen,
+    handleEditClose,
+  } = useClientEdit();
+  const { deleteClientId, setDeleteClientId, isDeleting, handleDelete } =
+    useClientDeleteDialog();
 
   return (
     <main className='flex flex-col gap-6 p-8'>
@@ -67,7 +73,10 @@ export function ClientsPage() {
         onPageChange={setPage}
       />
 
-      <CreateClientDialog open={isRegisterModalOpen} setOpen={setIsRegisterModalOpen} />
+      <CreateClientDialog
+        open={isRegisterModalOpen}
+        setOpen={setIsRegisterModalOpen}
+      />
       <EditClientDialog client={editingClient} onClose={handleEditClose} />
       <ClientDeleteDialog
         open={!!deleteClientId}

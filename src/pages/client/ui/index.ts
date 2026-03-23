@@ -1,2 +1,2 @@
-export { ClientsPage } from "./ClientsPage";
+export { ClientPage } from './ClientPage';
 export { ClientDetailPage } from "./ClientDetailPage";

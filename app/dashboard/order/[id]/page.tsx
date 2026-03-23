@@ -1,7 +1,7 @@
-import { ClientDetailPage } from "@/src/pages/clients/ui";
+import { OrderDetailPage } from "@/src/pages/order/ui";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;
   
-  return <ClientDetailPage id={id} />;
+  return <OrderDetailPage id={id} />;
 }

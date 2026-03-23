@@ -1,4 +1,4 @@
-import { PaymentDetailPage } from "@/src/pages/payments/ui";
+import { PaymentDetailPage } from "@/src/pages/payment/ui";
 
 export default async function Page({ params }: { params: { id: string } }) {
   const { id } = await params;

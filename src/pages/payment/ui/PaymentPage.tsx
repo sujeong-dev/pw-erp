@@ -13,15 +13,26 @@ import { PaymentsTable } from '@/src/widgets/payments-table';
 
 const PAGE_SIZE = 10;
 
-export function PaymentsPage() {
+export function PaymentPage() {
   const router = useRouter();
   const [dialogOpen, setDialogOpen] = useState(false);
 
-  const { creditType, setCreditType, clientName, setClientName, debouncedClientName, startDate, setStartDate, endDate, setEndDate } = usePaymentsFilters();
+  const {
+    creditType,
+    setCreditType,
+    clientName,
+    setClientName,
+    debouncedClientName,
+    startDate,
+    setStartDate,
+    endDate,
+    setEndDate,
+  } = usePaymentsFilters();
   const { page, setPage, reset } = usePagination();
 
   const { data, isLoading } = usePayments({
-    creditType: creditType !== 'all' ? (creditType as 'DEPOSIT' | 'REFUND') : undefined,
+    creditType:
+      creditType !== 'all' ? (creditType as 'DEPOSIT' | 'REFUND') : undefined,
     clientName: debouncedClientName || undefined,
     startDate: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
     endDate: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
@@ -43,13 +54,25 @@ export function PaymentsPage() {
 
       <PaymentsFilters
         clientName={clientName}
-        onClientNameChange={(v) => { setClientName(v); reset(); }}
+        onClientNameChange={(v) => {
+          setClientName(v);
+          reset();
+        }}
         startDate={startDate}
-        onStartDateChange={(d) => { setStartDate(d); reset(); }}
+        onStartDateChange={(d) => {
+          setStartDate(d);
+          reset();
+        }}
         endDate={endDate}
-        onEndDateChange={(d) => { setEndDate(d); reset(); }}
+        onEndDateChange={(d) => {
+          setEndDate(d);
+          reset();
+        }}
         creditType={creditType}
-        onCreditTypeChange={(v) => { setCreditType(v); reset(); }}
+        onCreditTypeChange={(v) => {
+          setCreditType(v);
+          reset();
+        }}
       />
 
       <PaymentsTable

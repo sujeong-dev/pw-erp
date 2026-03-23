@@ -1,2 +1,2 @@
-export { PaymentsPage } from "./PaymentsPage";
+export { PaymentPage } from './PaymentPage';
 export { PaymentDetailPage } from "./PaymentDetailPage";

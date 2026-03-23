@@ -57,16 +57,16 @@ function formatAmount(amount: number): string {
 
 const PAGE_SIZE = 10;
 
-export function DashboardPage() {
-  const [search, setSearch] = useState("");
+export function LedgerPage() {
+  const [search, setSearch] = useState('');
   const [date, setDate] = useState<Date | undefined>(undefined);
-  const [typeFilter, setTypeFilter] = useState<"all" | TxType>("all");
+  const [typeFilter, setTypeFilter] = useState<'all' | TxType>('all');
   const [page, setPage] = useState(1);
 
   const filtered = transactions.filter((tx) => {
     const matchClient = tx.client.includes(search);
-    const matchDate = !date || tx.date === format(date, "yyyy-MM-dd");
-    const matchType = typeFilter === "all" || tx.type === typeFilter;
+    const matchDate = !date || tx.date === format(date, 'yyyy-MM-dd');
+    const matchType = typeFilter === 'all' || tx.type === typeFilter;
     return matchClient && matchDate && matchType;
   });
 
@@ -116,26 +116,35 @@ export function DashboardPage() {
         <div className='flex items-center gap-3'>
           <SearchInput
             value={search}
-            onChange={(v) => { setSearch(v); resetPage(); }}
-            placeholder="거래처명 검색"
-            className="w-56"
+            onChange={(v) => {
+              setSearch(v);
+              resetPage();
+            }}
+            placeholder='거래처명 검색'
+            className='w-56'
           />
 
           <DateFilter
             value={date}
-            onChange={(d) => { setDate(d); resetPage(); }}
-            placeholder="거래일자"
+            onChange={(d) => {
+              setDate(d);
+              resetPage();
+            }}
+            placeholder='거래일자'
           />
 
           <SelectFilter
             value={typeFilter}
-            onChange={(v) => { setTypeFilter(v as typeof typeFilter); resetPage(); }}
+            onChange={(v) => {
+              setTypeFilter(v as typeof typeFilter);
+              resetPage();
+            }}
             options={[
-              { value: "all", label: "구분 전체" },
-              { value: "매출", label: "매출" },
-              { value: "수금", label: "수금" },
+              { value: 'all', label: '구분 전체' },
+              { value: '매출', label: '매출' },
+              { value: '수금', label: '수금' },
             ]}
-            className="w-32"
+            className='w-32'
           />
         </div>
 

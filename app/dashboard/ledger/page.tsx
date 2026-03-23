@@ -1,5 +1,5 @@
-import { DashboardPage } from "@/src/pages/dashboard/ui";
+import { LedgerPage } from "@/src/pages/ledger/ui";
 
 export default function Page() {
-  return <DashboardPage />;
+  return <LedgerPage />;
 }
