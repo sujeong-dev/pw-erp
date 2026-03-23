@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import type { Client, ClientsResponse } from '@/src/features/clients/api';
+import type { Client, ClientsResponse, LedgerItem } from '@/src/features/clients/api';
 
 export const mockClients: Client[] = [
   { id: 'c-001', code: 'C-001', name: '한국무역(주)', contactName: '김철수', contactPhone: '010-1234-5678', totalBalance: 8_800_000, lastSaleDate: '2026-03-17', createdAt: '2025-01-10T00:00:00Z' },
@@ -18,7 +18,70 @@ export const mockClients: Client[] = [
 
 let nextId = 13;
 
+type MockLedgerItem = LedgerItem & { clientId: string };
+
+const mockLedgerItems: MockLedgerItem[] = [
+  // c-001 SALES
+  { id: 'o-001', clientId: 'c-001', date: '2026-03-17T00:00:00.000Z', type: 'SALES', creditType: null, code: 'S-2026-001', status: 'UNPAID', debit: 4_400_000, credit: null },
+  { id: 'o-013', clientId: 'c-001', date: '2026-03-03T00:00:00.000Z', type: 'SALES', creditType: null, code: 'S-2026-013', status: 'PAID', debit: 8_800_000, credit: null },
+  // c-001 PAYMENT
+  { id: 'p-001', clientId: 'c-001', date: '2026-03-10T00:00:00.000Z', type: 'PAYMENT', creditType: 'DEPOSIT', code: null, status: null, debit: null, credit: 8_800_000 },
+  { id: 'p-002', clientId: 'c-001', date: '2026-03-06T00:00:00.000Z', type: 'PAYMENT', creditType: 'REFUND', code: null, status: null, debit: null, credit: 500_000 },
+  // c-002 SALES
+  { id: 'o-002', clientId: 'c-002', date: '2026-03-15T00:00:00.000Z', type: 'SALES', creditType: null, code: 'S-2026-002', status: 'PAID', debit: 3_344_000, credit: null },
+  { id: 'o-014', clientId: 'c-002', date: '2026-03-02T00:00:00.000Z', type: 'SALES', creditType: null, code: 'S-2026-014', status: 'UNPAID', debit: 2_926_000, credit: null },
+  // c-002 PAYMENT
+  { id: 'p-003', clientId: 'c-002', date: '2026-03-08T00:00:00.000Z', type: 'PAYMENT', creditType: 'DEPOSIT', code: null, status: null, debit: null, credit: 3_344_000 },
+  // c-003 SALES
+  { id: 'o-003', clientId: 'c-003', date: '2026-03-14T00:00:00.000Z', type: 'SALES', creditType: null, code: 'S-2026-003', status: 'PARTIAL', debit: 2_376_000, credit: null },
+  // c-003 PAYMENT
+  { id: 'p-004', clientId: 'c-003', date: '2026-03-11T00:00:00.000Z', type: 'PAYMENT', creditType: 'DEPOSIT', code: null, status: null, debit: null, credit: 1_000_000 },
+  // c-004 SALES
+  { id: 'o-004', clientId: 'c-004', date: '2026-03-12T00:00:00.000Z', type: 'SALES', creditType: null, code: 'S-2026-004', status: 'UNPAID', debit: 1_925_000, credit: null },
+  // c-006 SALES
+  { id: 'o-006', clientId: 'c-006', date: '2026-03-10T00:00:00.000Z', type: 'SALES', creditType: null, code: 'S-2026-006', status: 'PAID', debit: 4_702_500, credit: null },
+  // c-011 SALES
+  { id: 'o-011', clientId: 'c-011', date: '2026-03-05T00:00:00.000Z', type: 'SALES', creditType: null, code: 'S-2026-011', status: 'UNPAID', debit: 7_920_000, credit: null },
+];
+
 export const clientHandlers = [
+  http.get('*/api/clients/:id/summary', ({ params }) => {
+    const { id } = params as { id: string };
+    const clientItems = mockLedgerItems.filter((i) => i.clientId === id);
+    const totalSaleAmount = clientItems
+      .filter((i) => i.type === 'SALES')
+      .reduce((sum, i) => sum + (i.debit ?? 0), 0);
+    const totalPaymentAmount = clientItems
+      .filter((i) => i.type === 'PAYMENT')
+      .reduce((sum, i) => sum + (i.credit ?? 0), 0);
+    const totalBalance = totalSaleAmount - totalPaymentAmount;
+    return HttpResponse.json({ totalSaleAmount, totalPaymentAmount, totalBalance });
+  }),
+
+  http.get('*/api/clients/:id/ledger', ({ params, request }) => {
+    const { id } = params as { id: string };
+    const url = new URL(request.url);
+    const code = url.searchParams.get('code') ?? '';
+    const type = url.searchParams.get('type') ?? '';
+    const status = url.searchParams.get('status') ?? '';
+    const startDate = url.searchParams.get('startDate') ?? '';
+    const endDate = url.searchParams.get('endDate') ?? '';
+    const page = Number(url.searchParams.get('page') ?? 1);
+    const pageSize = Number(url.searchParams.get('pageSize') ?? 10);
+
+    let filtered = mockLedgerItems.filter((i) => i.clientId === id);
+    if (code) filtered = filtered.filter((i) => i.code?.includes(code));
+    if (type) filtered = filtered.filter((i) => i.type === type);
+    if (status) filtered = filtered.filter((i) => i.status === status);
+    if (startDate) filtered = filtered.filter((i) => i.date >= startDate);
+    if (endDate) filtered = filtered.filter((i) => i.date <= endDate);
+
+    const totalElements = filtered.length;
+    const totalPages = Math.max(1, Math.ceil(totalElements / pageSize));
+    const items = filtered.slice((page - 1) * pageSize, page * pageSize);
+    return HttpResponse.json({ totalPages, totalElements, size: pageSize, page, items });
+  }),
+
   http.get('*/api/clients', ({ request }) => {
     const url = new URL(request.url);
     const name = url.searchParams.get('name') ?? '';

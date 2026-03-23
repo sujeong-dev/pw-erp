@@ -62,3 +62,44 @@ export type ClientSummary = {
 export async function getClientSummary(id: string): Promise<ClientSummary> {
   return apiClient.get(`api/clients/${id}/summary`).json<ClientSummary>();
 }
+
+export type LedgerItem = {
+  id: string;
+  date: string;
+  type: 'SALES' | 'PAYMENT';
+  creditType: 'DEPOSIT' | 'REFUND' | null;
+  code: string | null;
+  status: 'UNPAID' | 'PAID' | 'PARTIAL' | 'CANCEL' | null;
+  debit: number | null;
+  credit: number | null;
+};
+
+export type LedgerResponse = {
+  totalPages: number;
+  totalElements: number;
+  size: number;
+  page: number;
+  items: LedgerItem[];
+};
+
+export type GetLedgerParams = {
+  code?: string;
+  type?: 'SALES' | 'PAYMENT';
+  status?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  pageSize?: number;
+};
+
+export async function getClientLedger(id: string, params: GetLedgerParams): Promise<LedgerResponse> {
+  const searchParams: Record<string, string> = {};
+  if (params.code) searchParams.code = params.code;
+  if (params.type) searchParams.type = params.type;
+  if (params.status) searchParams.status = params.status;
+  if (params.startDate) searchParams.startDate = params.startDate;
+  if (params.endDate) searchParams.endDate = params.endDate;
+  if (params.page !== undefined) searchParams.page = String(params.page);
+  if (params.pageSize !== undefined) searchParams.pageSize = String(params.pageSize);
+  return apiClient.get(`api/clients/${id}/ledger`, { searchParams }).json<LedgerResponse>();
+}
