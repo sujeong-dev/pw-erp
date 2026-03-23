@@ -59,8 +59,10 @@ function formatAmount(amount: number): string {
 export function EditOrderDialog({ order, onClose }: Props) {
   const [dateOpen, setDateOpen] = useState(false);
 
-  const { data: clients = [] } = useClients({});
+  const { data } = useClients({});
   const { mutate: updateOrder, isPending } = useUpdateOrder();
+
+  const clients = data?.items ?? [];
 
   const {
     register,
