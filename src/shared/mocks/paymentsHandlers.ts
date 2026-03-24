@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import type { Payment, CreatePaymentRequest } from '@/src/features/payments';
-import { mockClients } from './clientHandlers';
+import { mockClients, mockLedgerItems, type MockLedgerItem } from './clientHandlers';
 
 export const mockPayments: Payment[] = [
   { id: 'pay-001', creditType: 'DEPOSIT', date: '2026-03-17T00:00:00.000Z', clientName: '한국무역(주)', amount: 4_400_000, method: 'CASH' },
@@ -53,6 +53,20 @@ export const paymentHandlers = [
       method: body.method,
     };
     mockPayments.push(newPayment);
+
+    const newLedgerItem: MockLedgerItem = {
+      id: newPayment.id,
+      clientId: body.clientId,
+      date: newPayment.date,
+      type: 'PAYMENT',
+      creditType: 'DEPOSIT',
+      code: null,
+      status: null,
+      debit: null,
+      credit: body.amount,
+    };
+    mockLedgerItems.push(newLedgerItem);
+
     return HttpResponse.json(newPayment, { status: 201 });
   }),
 ];

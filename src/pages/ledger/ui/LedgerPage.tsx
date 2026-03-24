@@ -1,87 +1,68 @@
-"use client";
+'use client';
 
-import { useState } from "react";
-import { format } from "date-fns";
-import { Download } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { format } from 'date-fns';
+import { Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TablePagination } from '@/src/shared/ui';
+import { usePagination } from '@/src/shared/lib/hooks';
+import { cn } from '@/lib/utils';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination";
-import { cn } from "@/lib/utils";
-import { TX_STATUS, statusVariant } from "@/src/shared/constants";
-import type { TxStatus } from "@/src/shared/constants";
-import { DateFilter, SearchInput, SelectFilter } from "@/src/shared/ui";
-
-type TxType = "매출" | "수금";
-
-const summaryCards = [
-  { label: "총 매출액", amount: 42_800_000, red: false },
-  { label: "총 입금액", amount: 35_200_000, red: false },
-  { label: "총 미수금 잔액", amount: 7_600_000, red: true },
-];
-
-const transactions: { date: string; client: string; type: TxType; amount: number; status: TxStatus | null }[] = [
-  { date: "2026-03-17", client: "한국무역(주)", type: "매출", amount: 3_500_000, status: TX_STATUS.UNPAID },
-  { date: "2026-03-15", client: "대성산업",     type: "수금", amount: 2_200_000, status: null },
-  { date: "2026-03-14", client: "서울전자(주)", type: "매출", amount: 1_800_000, status: TX_STATUS.PAID },
-  { date: "2026-03-12", client: "미래물산",     type: "매출", amount: 950_000,   status: TX_STATUS.PARTIAL },
-  { date: "2026-03-11", client: "동아상사",     type: "수금", amount: 1_200_000, status: null },
-  { date: "2026-03-10", client: "태양무역",     type: "매출", amount: 4_800_000, status: TX_STATUS.CANCEL },
-  { date: "2026-03-09", client: "국제기업(주)", type: "매출", amount: 680_000,   status: TX_STATUS.PAID },
-  { date: "2026-03-08", client: "한빛산업",     type: "수금", amount: 2_750_000, status: null },
-  { date: "2026-03-07", client: "성진상사",     type: "매출", amount: 1_300_000, status: TX_STATUS.UNPAID },
-  { date: "2026-03-06", client: "우리물산",     type: "매출", amount: 900_000,   status: TX_STATUS.PARTIAL },
-  { date: "2026-03-05", client: "현대유통",     type: "수금", amount: 3_200_000, status: null },
-  { date: "2026-03-04", client: "신한기업",     type: "매출", amount: 560_000,   status: TX_STATUS.PAID },
-];
-
-
-function formatAmount(amount: number): string {
-  return amount.toLocaleString("ko-KR") + "원";
-}
+  useLedgerSummary,
+  useLedger,
+  useLedgerFilters,
+  useSelectedLedgerItem,
+  LedgerFilters,
+  LedgerDetailDialog,
+} from '@/src/features/ledger';
+import { LedgerTable } from '@/src/widgets/ledger-table';
 
 const PAGE_SIZE = 10;
 
 export function LedgerPage() {
-  const [search, setSearch] = useState('');
-  const [date, setDate] = useState<Date | undefined>(undefined);
-  const [typeFilter, setTypeFilter] = useState<'all' | TxType>('all');
-  const [page, setPage] = useState(1);
+  const {
+    code, setCode, debouncedCode,
+    clientName, setClientName, debouncedClientName,
+    type, setType,
+    status, setStatus,
+    startDate, setStartDate,
+    endDate, setEndDate,
+  } = useLedgerFilters();
+  const { page, setPage, reset } = usePagination();
+  const { selectedItem, setSelectedItem, clear } = useSelectedLedgerItem();
 
-  const filtered = transactions.filter((tx) => {
-    const matchClient = tx.client.includes(search);
-    const matchDate = !date || tx.date === format(date, 'yyyy-MM-dd');
-    const matchType = typeFilter === 'all' || tx.type === typeFilter;
-    return matchClient && matchDate && matchType;
+  const formattedStart = startDate ? format(startDate, 'yyyy-MM-dd') : undefined;
+  const formattedEnd = endDate ? format(endDate, 'yyyy-MM-dd') : undefined;
+
+  const { data: summary } = useLedgerSummary({
+    clientName: debouncedClientName || undefined,
+    startDate: formattedStart,
+    endDate: formattedEnd,
   });
 
-  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
-  const paged = filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  const { data: ledger, isLoading: ledgerLoading } = useLedger({
+    code: debouncedCode || undefined,
+    clientName: debouncedClientName || undefined,
+    type: type !== 'all' ? (type as 'SALES' | 'PAYMENT') : undefined,
+    status: status !== 'all' ? status : undefined,
+    startDate: formattedStart,
+    endDate: formattedEnd,
+    page,
+    pageSize: PAGE_SIZE,
+  });
 
-  function resetPage() {
-    setPage(1);
+  function handleFilterChange(setter: (v: string) => void) {
+    return (v: string) => { setter(v); reset(); };
   }
 
   return (
     <main className='flex flex-col gap-8 p-8'>
-      {/* Summary Cards */}
       <section className='grid grid-cols-3 gap-4'>
-        {summaryCards.map((card) => (
+        {[
+          { label: '총 매출액', value: summary?.totalSaleAmount, red: false },
+          { label: '총 입금액', value: summary?.totalPaymentAmount, red: false },
+          { label: '총 미수금 잔액', value: summary?.totalBalance, red: true },
+        ].map((card) => (
           <Card key={card.label}>
             <CardHeader className='pb-2'>
               <CardTitle className='text-sm font-medium text-muted-foreground'>
@@ -89,20 +70,14 @@ export function LedgerPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <p
-                className={cn(
-                  'text-2xl font-bold',
-                  card.red && 'text-destructive',
-                )}
-              >
-                {formatAmount(card.amount)}
+              <p className={cn('text-2xl font-bold', card.red && 'text-destructive')}>
+                {card.value !== undefined ? `${card.value.toLocaleString('ko-KR')}원` : '-'}
               </p>
             </CardContent>
           </Card>
         ))}
       </section>
 
-      {/* Transaction Table */}
       <section className='flex flex-col gap-4'>
         <div className='flex items-center justify-between'>
           <h2 className='text-lg font-semibold'>거래 내역</h2>
@@ -112,119 +87,35 @@ export function LedgerPage() {
           </Button>
         </div>
 
-        {/* Filters */}
-        <div className='flex items-center gap-3'>
-          <SearchInput
-            value={search}
-            onChange={(v) => {
-              setSearch(v);
-              resetPage();
-            }}
-            placeholder='거래처명 검색'
-            className='w-56'
-          />
+        <LedgerFilters
+          code={code}
+          onCodeChange={handleFilterChange(setCode)}
+          clientName={clientName}
+          onClientNameChange={(v) => { setClientName(v); reset(); }}
+          startDate={startDate}
+          onStartDateChange={(d) => { setStartDate(d); reset(); }}
+          endDate={endDate}
+          onEndDateChange={(d) => { setEndDate(d); reset(); }}
+          type={type}
+          onTypeChange={handleFilterChange(setType)}
+          status={status}
+          onStatusChange={handleFilterChange(setStatus)}
+        />
 
-          <DateFilter
-            value={date}
-            onChange={(d) => {
-              setDate(d);
-              resetPage();
-            }}
-            placeholder='거래일자'
-          />
+        <LedgerTable
+          items={ledger?.items ?? []}
+          isLoading={ledgerLoading}
+          onRowClick={setSelectedItem}
+        />
 
-          <SelectFilter
-            value={typeFilter}
-            onChange={(v) => {
-              setTypeFilter(v as typeof typeFilter);
-              resetPage();
-            }}
-            options={[
-              { value: 'all', label: '구분 전체' },
-              { value: '매출', label: '매출' },
-              { value: '수금', label: '수금' },
-            ]}
-            className='w-32'
-          />
-        </div>
-
-        <Card>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>거래 일자</TableHead>
-                <TableHead>구분</TableHead>
-                <TableHead>거래처명</TableHead>
-                <TableHead className='text-right'>금액</TableHead>
-                <TableHead className='text-center'>상태</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paged.map((tx, i) => (
-                <TableRow key={i}>
-                  <TableCell className='text-muted-foreground'>
-                    {tx.date}
-                  </TableCell>
-                  <TableCell>{tx.type}</TableCell>
-                  <TableCell>{tx.client}</TableCell>
-                  <TableCell className='text-right'>
-                    {formatAmount(tx.amount)}
-                  </TableCell>
-                  <TableCell className='flex justify-center'>
-                    {tx.status ? (
-                      <Badge variant={statusVariant[tx.status]}>
-                        {tx.status}
-                      </Badge>
-                    ) : (
-                      <span className='text-muted-foreground'>-</span>
-                    )}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Card>
-
-        {totalPages > 1 && (
-          <Pagination>
-            <PaginationContent>
-              <PaginationItem>
-                <PaginationPrevious
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  aria-disabled={page === 1}
-                  className={
-                    page === 1
-                      ? 'pointer-events-none opacity-50'
-                      : 'cursor-pointer'
-                  }
-                />
-              </PaginationItem>
-              {Array.from({ length: totalPages }, (_, i) => (
-                <PaginationItem key={i + 1}>
-                  <PaginationLink
-                    isActive={page === i + 1}
-                    onClick={() => setPage(i + 1)}
-                    className='cursor-pointer'
-                  >
-                    {i + 1}
-                  </PaginationLink>
-                </PaginationItem>
-              ))}
-              <PaginationItem>
-                <PaginationNext
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  aria-disabled={page === totalPages}
-                  className={
-                    page === totalPages
-                      ? 'pointer-events-none opacity-50'
-                      : 'cursor-pointer'
-                  }
-                />
-              </PaginationItem>
-            </PaginationContent>
-          </Pagination>
-        )}
+        <TablePagination
+          page={page}
+          totalPages={ledger?.totalPages ?? 1}
+          onPageChange={setPage}
+        />
       </section>
+
+      <LedgerDetailDialog item={selectedItem} onClose={clear} />
     </main>
   );
 }

@@ -18,9 +18,9 @@ export const mockClients: Client[] = [
 
 let nextId = 13;
 
-type MockLedgerItem = LedgerItem & { clientId: string };
+export type MockLedgerItem = LedgerItem & { clientId: string };
 
-const mockLedgerItems: MockLedgerItem[] = [
+export const mockLedgerItems: MockLedgerItem[] = [
   // c-001 SALES
   { id: 'o-001', clientId: 'c-001', date: '2026-03-17T00:00:00.000Z', type: 'SALES', creditType: null, code: 'S-2026-001', status: 'UNPAID', debit: 4_400_000, credit: null },
   { id: 'o-013', clientId: 'c-001', date: '2026-03-03T00:00:00.000Z', type: 'SALES', creditType: null, code: 'S-2026-013', status: 'PAID', debit: 8_800_000, credit: null },
