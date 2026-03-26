@@ -13,9 +13,9 @@ import {
 } from '@/components/ui/table';
 import type { Payment } from '@/src/features/payments';
 
-const METHOD_DISPLAY: Record<'CASH' | 'NOTE', string> = {
+const METHOD_DISPLAY: Record<'CASH' | 'BILL', string> = {
   CASH: '현금',
-  NOTE: '어음',
+  BILL: '어음',
 };
 
 type Props = {

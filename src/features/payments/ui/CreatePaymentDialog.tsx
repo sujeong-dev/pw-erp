@@ -64,7 +64,7 @@ export function CreatePaymentDialog({ open, setOpen }: Props) {
         clientId: form.clientId,
         date: format(date!, 'yyyy-MM-dd'),
         amount: Number(form.amount),
-        method: form.method as 'CASH' | 'NOTE',
+        method: form.method as 'CASH' | 'BILL',
         memo: form.memo || undefined,
       },
       { onSuccess: () => handleOpenChange(false) },
@@ -127,7 +127,7 @@ export function CreatePaymentDialog({ open, setOpen }: Props) {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value='CASH'>현금</SelectItem>
-                <SelectItem value='NOTE'>어음</SelectItem>
+                <SelectItem value='BILL'>어음</SelectItem>
               </SelectContent>
             </Select>
           </div>

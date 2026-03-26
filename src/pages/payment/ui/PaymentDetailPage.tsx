@@ -14,7 +14,7 @@ type CreditType = (typeof CREDIT_TYPE)[keyof typeof CREDIT_TYPE];
 
 const PAYMENT_METHOD = {
   CASH: "현금",
-  NOTE: "어음",
+  BILL: "어음",
 } as const;
 type PaymentMethod = (typeof PAYMENT_METHOD)[keyof typeof PAYMENT_METHOD];
 
@@ -35,18 +35,18 @@ type Payment = {
 
 const mockPayments: Payment[] = [
   { id: "P001", client: "한국무역(주)", creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-17", amount: 4_400_000, method: PAYMENT_METHOD.CASH, memo: "3월 정기 수금" },
-  { id: "P002", client: "대성산업",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-16", amount: 3_344_000, method: PAYMENT_METHOD.NOTE },
+  { id: "P002", client: "대성산업",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-16", amount: 3_344_000, method: PAYMENT_METHOD.BILL },
   { id: "P003", client: "서울전자(주)", creditType: CREDIT_TYPE.REFUND,  date: "2026-03-15", amount: 2_376_000, method: PAYMENT_METHOD.CASH, memo: "불량품 환불 처리" },
   { id: "P004", client: "미래물산",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-14", amount: 1_925_000, method: PAYMENT_METHOD.CASH },
-  { id: "P005", client: "동아상사",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-13", amount: 7_040_000, method: PAYMENT_METHOD.NOTE },
+  { id: "P005", client: "동아상사",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-13", amount: 7_040_000, method: PAYMENT_METHOD.BILL },
   { id: "P006", client: "태양무역",     creditType: CREDIT_TYPE.REFUND,  date: "2026-03-12", amount: 4_702_500, method: PAYMENT_METHOD.CASH },
-  { id: "P007", client: "국제기업(주)", creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-11", amount: 1_056_000, method: PAYMENT_METHOD.NOTE },
+  { id: "P007", client: "국제기업(주)", creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-11", amount: 1_056_000, method: PAYMENT_METHOD.BILL },
   { id: "P008", client: "한빛산업",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-10", amount: 2_310_000, method: PAYMENT_METHOD.CASH },
   { id: "P009", client: "성진상사",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-09", amount: 1_760_000, method: PAYMENT_METHOD.CASH },
-  { id: "P010", client: "우리물산",     creditType: CREDIT_TYPE.REFUND,  date: "2026-03-08", amount: 1_567_500, method: PAYMENT_METHOD.NOTE, memo: "계약 취소에 따른 환불" },
-  { id: "P011", client: "현대유통",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-07", amount: 7_920_000, method: PAYMENT_METHOD.NOTE },
+  { id: "P010", client: "우리물산",     creditType: CREDIT_TYPE.REFUND,  date: "2026-03-08", amount: 1_567_500, method: PAYMENT_METHOD.BILL, memo: "계약 취소에 따른 환불" },
+  { id: "P011", client: "현대유통",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-07", amount: 7_920_000, method: PAYMENT_METHOD.BILL },
   { id: "P012", client: "신한기업",     creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-06", amount: 385_000,   method: PAYMENT_METHOD.CASH },
-  { id: "P013", client: "한국무역(주)", creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-05", amount: 8_800_000, method: PAYMENT_METHOD.NOTE },
+  { id: "P013", client: "한국무역(주)", creditType: CREDIT_TYPE.DEPOSIT, date: "2026-03-05", amount: 8_800_000, method: PAYMENT_METHOD.BILL },
   { id: "P014", client: "대성산업",     creditType: CREDIT_TYPE.REFUND,  date: "2026-03-04", amount: 2_926_000, method: PAYMENT_METHOD.CASH },
 ];
 
