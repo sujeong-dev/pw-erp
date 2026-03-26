@@ -20,6 +20,23 @@ function getAllLedgerItems(): GlobalLedgerItem[] {
 }
 
 export const ledgerHandlers = [
+  http.get('*/api/export/excel', ({ request }) => {
+    const url = new URL(request.url);
+    const clientName = url.searchParams.get('clientName') ?? '';
+    const startDate = url.searchParams.get('startDate') ?? '';
+    const endDate = url.searchParams.get('endDate') ?? '';
+
+    const namePart = clientName || '전체거래처';
+    const datePart = startDate && endDate
+      ? `${startDate}~${endDate}`
+      : startDate || endDate || new Date().toISOString().slice(0, 10);
+
+    const filename = `${namePart}_${datePart}.xlsx`;
+    const fakeUrl = `https://pw-erp-exports.accountid.r2.cloudflarestorage.com/exports/${filename}?X-Amz-mock=1`;
+
+    return HttpResponse.json({ url: fakeUrl, filename });
+  }),
+
   http.get('*/api/ledger/summary', ({ request }) => {
     const url = new URL(request.url);
     const clientName = url.searchParams.get('clientName') ?? '';

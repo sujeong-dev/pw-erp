@@ -43,6 +43,29 @@ export type GetGlobalLedgerParams = {
   pageSize?: number;
 };
 
+export type LedgerExcelExportParams = {
+  clientName?: string;
+  type?: 'SALES' | 'PAYMENT';
+  status?: 'UNPAID' | 'PARTIAL' | 'PAID' | 'CANCEL';
+  startDate?: string;
+  endDate?: string;
+};
+
+export type LedgerExcelExportResponse = {
+  url: string;
+  filename: string;
+};
+
+export async function getLedgerExcelExport(params?: LedgerExcelExportParams): Promise<LedgerExcelExportResponse> {
+  const searchParams: Record<string, string> = {};
+  if (params?.clientName) searchParams.clientName = params.clientName;
+  if (params?.type) searchParams.type = params.type;
+  if (params?.status) searchParams.status = params.status;
+  if (params?.startDate) searchParams.startDate = params.startDate;
+  if (params?.endDate) searchParams.endDate = params.endDate;
+  return apiClient.get('api/export/excel', { searchParams }).json<LedgerExcelExportResponse>();
+}
+
 export async function getLedgerSummary(params: GetSummaryParams): Promise<LedgerSummary> {
   const searchParams: Record<string, string> = {};
   if (params.clientName) searchParams.clientName = params.clientName;
