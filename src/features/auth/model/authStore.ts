@@ -16,9 +16,19 @@ export const useAuthStore = create<AuthState>()(
       accessToken: null,
       refreshToken: null,
       rememberedEmail: null,
-      setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
+      setTokens: (accessToken, refreshToken) => {
+        if (typeof document !== 'undefined') {
+          document.cookie = `access_token=${accessToken}; path=/; max-age=${60 * 60 * 24 * 7}`;
+        }
+        set({ accessToken, refreshToken });
+      },
       setRememberedEmail: (email) => set({ rememberedEmail: email }),
-      clear: () => set({ accessToken: null, refreshToken: null }),
+      clear: () => {
+        if (typeof document !== 'undefined') {
+          document.cookie = 'access_token=; path=/; max-age=0';
+        }
+        set({ accessToken: null, refreshToken: null });
+      },
     }),
     { name: 'auth' },
   ),
