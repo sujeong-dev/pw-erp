@@ -45,9 +45,16 @@ export const mockLedgerItems: MockLedgerItem[] = [
 ];
 
 export const clientHandlers = [
-  http.get('*/api/clients/:id/summary', ({ params }) => {
+  http.get('*/api/clients/:id/summary', ({ params, request }) => {
     const { id } = params as { id: string };
-    const clientItems = mockLedgerItems.filter((i) => i.clientId === id);
+    const url = new URL(request.url);
+    const startDate = url.searchParams.get('startDate') ?? '';
+    const endDate = url.searchParams.get('endDate') ?? '';
+
+    let clientItems = mockLedgerItems.filter((i) => i.clientId === id);
+    if (startDate) clientItems = clientItems.filter((i) => i.date >= startDate);
+    if (endDate) clientItems = clientItems.filter((i) => i.date <= endDate);
+
     const totalSaleAmount = clientItems
       .filter((i) => i.type === 'SALES')
       .reduce((sum, i) => sum + (i.debit ?? 0), 0);

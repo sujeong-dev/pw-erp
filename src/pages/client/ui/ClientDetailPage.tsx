@@ -24,7 +24,10 @@ export function ClientDetailPage({ id }: { id: string }) {
   const { code, setCode, debouncedCode, type, setType, status, setStatus, startDate, setStartDate, endDate, setEndDate } = useLedgerFilters();
   const { page, setPage, reset } = usePagination();
 
-  const { data: summary, isLoading: summaryLoading } = useClientSummary(id);
+  const { data: summary, isLoading: summaryLoading } = useClientSummary(id, {
+    startDate: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
+    endDate: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
+  });
   const { data: ledger, isLoading: ledgerLoading } = useClientLedger(id, {
     code: debouncedCode || undefined,
     type: type !== 'all' ? (type as 'SALES' | 'PAYMENT') : undefined,

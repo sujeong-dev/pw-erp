@@ -59,8 +59,16 @@ export type ClientSummary = {
   totalBalance: number;
 };
 
-export async function getClientSummary(id: string): Promise<ClientSummary> {
-  return apiClient.get(`api/clients/${id}/summary`).json<ClientSummary>();
+export type GetClientSummaryParams = {
+  startDate?: string;
+  endDate?: string;
+};
+
+export async function getClientSummary(id: string, params?: GetClientSummaryParams): Promise<ClientSummary> {
+  const searchParams: Record<string, string> = {};
+  if (params?.startDate) searchParams.startDate = params.startDate;
+  if (params?.endDate) searchParams.endDate = params.endDate;
+  return apiClient.get(`api/clients/${id}/summary`, { searchParams }).json<ClientSummary>();
 }
 
 export type LedgerItem = {
