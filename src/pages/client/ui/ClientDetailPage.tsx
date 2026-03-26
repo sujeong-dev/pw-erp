@@ -13,6 +13,7 @@ import {
   useClientLedger,
   useLedgerFilters,
   useSelectedLedgerItem,
+  useClientExcelExport,
   LedgerFilters,
   LedgerDetailDialog,
 } from '@/src/features/clients';
@@ -39,6 +40,7 @@ export function ClientDetailPage({ id }: { id: string }) {
   });
 
   const { selectedItem, setSelectedItem, clear } = useSelectedLedgerItem();
+  const { mutate: downloadExcel, isPending: excelLoading } = useClientExcelExport(id);
 
   return (
     <main className='flex flex-col gap-6 p-8'>
@@ -89,7 +91,17 @@ export function ClientDetailPage({ id }: { id: string }) {
       <div className='flex flex-col gap-4'>
         <div className='flex items-center justify-between'>
           <h2 className='text-lg font-semibold'>거래내역 원장</h2>
-          <Button variant='default' className='cursor-pointer'>
+          <Button
+            variant='default'
+            className='cursor-pointer'
+            disabled={excelLoading}
+            onClick={() => downloadExcel({
+              type: type !== 'all' ? (type as 'SALES' | 'PAYMENT') : undefined,
+              status: status !== 'all' ? (status as 'UNPAID' | 'PARTIAL' | 'PAID' | 'CANCEL') : undefined,
+              startDate: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
+              endDate: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
+            })}
+          >
             <Download className='size-4' />
             엑셀 다운로드
           </Button>

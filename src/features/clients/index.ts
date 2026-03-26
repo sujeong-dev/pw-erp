@@ -15,5 +15,6 @@ export { LedgerDetailDialog } from './ui/LedgerDetailDialog';
 export { useClientLedger } from './model/useClientLedger';
 export { useLedgerFilters } from './model/useLedgerFilters';
 export { useSelectedLedgerItem } from './model/useSelectedLedgerItem';
-export type { Client, ClientsResponse, LedgerItem, LedgerResponse } from './api';
+export { useClientExcelExport } from './model/useClientExcelExport';
+export type { Client, ClientsResponse, LedgerItem, LedgerResponse, ExcelExportParams } from './api';
 export type { EditableClient } from './model/useClientEdit';

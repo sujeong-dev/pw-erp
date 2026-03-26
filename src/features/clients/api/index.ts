@@ -100,6 +100,27 @@ export type GetLedgerParams = {
   pageSize?: number;
 };
 
+export type ExcelExportParams = {
+  type?: 'SALES' | 'PAYMENT';
+  status?: 'UNPAID' | 'PARTIAL' | 'PAID' | 'CANCEL';
+  startDate?: string;
+  endDate?: string;
+};
+
+export type ExcelExportResponse = {
+  url: string;
+  filename: string;
+};
+
+export async function getClientExcelExport(id: string, params?: ExcelExportParams): Promise<ExcelExportResponse> {
+  const searchParams: Record<string, string> = {};
+  if (params?.type) searchParams.type = params.type;
+  if (params?.status) searchParams.status = params.status;
+  if (params?.startDate) searchParams.startDate = params.startDate;
+  if (params?.endDate) searchParams.endDate = params.endDate;
+  return apiClient.get(`api/export/excel/${id}`, { searchParams }).json<ExcelExportResponse>();
+}
+
 export async function getClientLedger(id: string, params: GetLedgerParams): Promise<LedgerResponse> {
   const searchParams: Record<string, string> = {};
   if (params.code) searchParams.code = params.code;

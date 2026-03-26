@@ -89,6 +89,24 @@ export const clientHandlers = [
     return HttpResponse.json({ totalPages, totalElements, size: pageSize, page, items });
   }),
 
+  http.get('*/api/export/excel/:clientId', ({ params, request }) => {
+    const { clientId } = params as { clientId: string };
+    const url = new URL(request.url);
+    const startDate = url.searchParams.get('startDate') ?? '';
+    const endDate = url.searchParams.get('endDate') ?? '';
+
+    const client = mockClients.find((c) => c.id === clientId);
+    const clientName = client?.name ?? clientId;
+    const datePart = startDate && endDate
+      ? `${startDate}~${endDate}`
+      : startDate || endDate || new Date().toISOString().slice(0, 10);
+
+    const filename = `${clientName}_${datePart}.xlsx`;
+    const fakeUrl = `https://pw-erp-exports.accountid.r2.cloudflarestorage.com/exports/${clientId}_${filename}?X-Amz-mock=1`;
+
+    return HttpResponse.json({ url: fakeUrl, filename });
+  }),
+
   http.get('*/api/clients', ({ request }) => {
     const url = new URL(request.url);
     const name = url.searchParams.get('name') ?? '';
