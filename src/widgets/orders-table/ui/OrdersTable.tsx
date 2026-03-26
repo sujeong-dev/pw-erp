@@ -23,10 +23,10 @@ type Props = {
   items: Order[];
   isLoading: boolean;
   onEditOpen: (order: Order) => void;
-  onDeleteRequest: (id: string) => void;
+  onRefundRequest: (order: Order) => void;
 };
 
-export function OrdersTable({ items, isLoading, onEditOpen, onDeleteRequest }: Props) {
+export function OrdersTable({ items, isLoading, onEditOpen, onRefundRequest }: Props) {
   const router = useRouter();
 
   return (
@@ -47,13 +47,19 @@ export function OrdersTable({ items, isLoading, onEditOpen, onDeleteRequest }: P
         <TableBody>
           {isLoading ? (
             <TableRow>
-              <TableCell colSpan={8} className='text-center text-muted-foreground py-8'>
+              <TableCell
+                colSpan={8}
+                className='text-center text-muted-foreground py-8'
+              >
                 불러오는 중...
               </TableCell>
             </TableRow>
           ) : items.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={8} className='text-center text-muted-foreground py-8'>
+              <TableCell
+                colSpan={8}
+                className='text-center text-muted-foreground py-8'
+              >
                 데이터가 없습니다.
               </TableCell>
             </TableRow>
@@ -62,15 +68,21 @@ export function OrdersTable({ items, isLoading, onEditOpen, onDeleteRequest }: P
               <TableRow
                 key={order.id}
                 className='cursor-pointer'
-                onClick={() => router.push(ROUTES.dashboard.orderDetail(order.id))}
+                onClick={() =>
+                  router.push(ROUTES.dashboard.orderDetail(order.id))
+                }
               >
-                <TableCell className='text-muted-foreground'>{order.code}</TableCell>
-                <TableCell className='text-muted-foreground'>{order.date}</TableCell>
+                <TableCell className='text-muted-foreground'>
+                  {order.code}
+                </TableCell>
+                <TableCell className='text-muted-foreground'>
+                  {order.date}
+                </TableCell>
                 <TableCell>{order.client.name}</TableCell>
                 <TableCell>{order.itemName}</TableCell>
                 <TableCell className='text-left'>{order.tonnage}t</TableCell>
                 <TableCell className='text-right'>
-                  {order.totalPrice.toLocaleString("ko-KR")}원
+                  {order.totalPrice.toLocaleString('ko-KR')}원
                 </TableCell>
                 <TableCell className='flex justify-center'>
                   <Badge variant={statusVariant[STATUS_DISPLAY[order.status]]}>
@@ -78,8 +90,8 @@ export function OrdersTable({ items, isLoading, onEditOpen, onDeleteRequest }: P
                   </Badge>
                 </TableCell>
                 <TableCell onClick={(e) => e.stopPropagation()}>
-                  {order.status === "UNPAID" && (
-                    <div className='flex items-center gap-2'>
+                  <div className='flex items-center gap-2'>
+                    {order.status === 'UNPAID' && (
                       <Button
                         variant='secondary'
                         size='sm'
@@ -88,16 +100,18 @@ export function OrdersTable({ items, isLoading, onEditOpen, onDeleteRequest }: P
                       >
                         수정
                       </Button>
+                    )}
+                    {order.isRefundable && (
                       <Button
-                        variant='outline'
+                        variant='destructive'
                         size='sm'
                         className='cursor-pointer'
-                        onClick={() => onDeleteRequest(order.id)}
+                        onClick={() => onRefundRequest(order)}
                       >
                         취소
                       </Button>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </TableCell>
               </TableRow>
             ))

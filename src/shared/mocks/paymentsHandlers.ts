@@ -43,6 +43,30 @@ export const paymentHandlers = [
     return HttpResponse.json({ totalPages, totalElements, size: pageSize, page, items });
   }),
 
+  http.post('*/api/payments/refund', async ({ request }) => {
+    const body = await request.json() as { clientId: string; date: string; amount: number; salesId: string; method: 'CASH' | 'BILL'; memo?: string };
+    const client = mockClients.find((c) => c.id === body.clientId);
+    const id = `pay-ref-${Date.now()}`;
+    const now = new Date().toISOString();
+    return HttpResponse.json({
+      data: {
+        id,
+        creditType: 'DEPOSIT',
+        date: now,
+        amount: body.amount,
+        method: body.method,
+        memo: body.memo ? { text: body.memo } : {},
+        client: client
+          ? { id: client.id, code: client.code, name: client.name }
+          : { id: body.clientId, code: '', name: '' },
+        saleId: body.salesId,
+        saleCode: `S-${body.salesId}`,
+        createdAt: now,
+      },
+      message: '매출 취소 처리가 완료되었습니다.',
+    });
+  }),
+
   http.post('*/api/payments', async ({ request }) => {
     const body = await request.json() as CreatePaymentRequest;
     const client = mockClients.find((c) => c.id === body.clientId);

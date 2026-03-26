@@ -8,11 +8,11 @@ import {
   useOrders,
   useOrdersFilters,
   useOrderEdit,
-  useOrderDeleteDialog,
+  useOrderRefundDialog,
   CreateOrderDialog,
   EditOrderDialog,
   OrdersFilters,
-  OrderDeleteDialog,
+  OrderRefundDialog,
 } from '@/src/features/orders';
 import { OrdersTable } from '@/src/widgets/orders-table/ui';
 
@@ -57,8 +57,7 @@ export function OrderPage() {
     handleEditOpen,
     handleEditClose,
   } = useOrderEdit();
-  const { deleteOrderId, setDeleteOrderId, isDeleting, handleDelete } =
-    useOrderDeleteDialog();
+  const { refundingOrder, openRefund, closeRefund } = useOrderRefundDialog();
 
   return (
     <main className='flex flex-col gap-6 p-8'>
@@ -103,7 +102,7 @@ export function OrderPage() {
         items={items}
         isLoading={isLoading}
         onEditOpen={handleEditOpen}
-        onDeleteRequest={setDeleteOrderId}
+        onRefundRequest={openRefund}
       />
 
       <TablePagination
@@ -118,12 +117,7 @@ export function OrderPage() {
         setOpen={setIsRegisterModalOpen}
       />
       <EditOrderDialog order={editingOrder} onClose={handleEditClose} />
-      <OrderDeleteDialog
-        open={!!deleteOrderId}
-        onOpenChange={(o) => !o && setDeleteOrderId(null)}
-        onConfirm={handleDelete}
-        isPending={isDeleting}
-      />
+      <OrderRefundDialog order={refundingOrder} onClose={closeRefund} />
     </main>
   );
 }

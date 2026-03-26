@@ -14,7 +14,9 @@ export type Order = {
   unitPrice: number;
   totalPrice: number;
   memo: string | null;
+  paidAmount: number;
   status: 'UNPAID' | 'PAID' | 'PARTIAL' | 'CANCEL';
+  isRefundable: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -76,4 +78,33 @@ export async function deleteOrder(id: string): Promise<DeleteOrderResponse> {
 
 export async function getOrder(id: string): Promise<Order> {
   return apiClient.get(`api/sales/${id}`).json<Order>();
+}
+
+export type RefundPaymentRequest = {
+  clientId: string;
+  date: string;
+  amount: number;
+  salesId: string;
+  method: 'CASH' | 'BILL';
+  memo?: string;
+};
+
+export type RefundPaymentResponse = {
+  data: {
+    id: string;
+    creditType: 'DEPOSIT';
+    date: string;
+    amount: number;
+    method: 'CASH' | 'BILL';
+    memo: object;
+    client: { id: string; code: string; name: string };
+    saleId: string;
+    saleCode: string;
+    createdAt: string;
+  };
+  message: string;
+};
+
+export async function createRefundPayment(body: RefundPaymentRequest): Promise<RefundPaymentResponse> {
+  return apiClient.post('api/payments/refund', { json: body }).json<RefundPaymentResponse>();
 }

@@ -76,18 +76,6 @@ export function PaymentsTable({ items, isLoading, onRowClick }: Props) {
                   {item.amount.toLocaleString('ko-KR')}원
                 </TableCell>
                 <TableCell className='text-center'>{METHOD_DISPLAY[item.method]}</TableCell>
-                <TableCell>
-                  {item.creditType === 'DEPOSIT' && (
-                    <Button
-                      variant='destructive'
-                      size='sm'
-                      className='cursor-pointer'
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      환불
-                    </Button>
-                  )}
-                </TableCell>
               </TableRow>
             ))
           )}
