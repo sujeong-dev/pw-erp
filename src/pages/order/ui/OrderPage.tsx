@@ -26,6 +26,8 @@ export function OrderPage() {
     setClientSearch,
     dateFilter,
     setDateFilter,
+    status,
+    setStatus,
     code,
     clientName,
     startDate,
@@ -37,6 +39,7 @@ export function OrderPage() {
   const { data, isLoading } = useOrders({
     code,
     clientName,
+    status: status !== 'all' ? status : undefined,
     startDate,
     endDate,
     page,
@@ -86,6 +89,11 @@ export function OrderPage() {
         dateFilter={dateFilter}
         onDateChange={(d) => {
           setDateFilter(d);
+          reset();
+        }}
+        status={status}
+        onStatusChange={(v) => {
+          setStatus(v);
           reset();
         }}
       />

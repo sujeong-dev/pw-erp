@@ -1,6 +1,14 @@
 "use client";
 
-import { DateFilter, SearchInput } from "@/src/shared/ui";
+import { DateFilter, SearchInput, SelectFilter } from "@/src/shared/ui";
+
+const STATUS_OPTIONS = [
+  { value: 'all', label: '상태 전체' },
+  { value: 'UNPAID', label: '미수금' },
+  { value: 'PAID', label: '완납' },
+  { value: 'PARTIAL', label: '부분납' },
+  { value: 'CANCEL', label: '취소' },
+];
 
 type Props = {
   codeSearch: string;
@@ -9,6 +17,8 @@ type Props = {
   onClientChange: (v: string) => void;
   dateFilter: Date | undefined;
   onDateChange: (d: Date | undefined) => void;
+  status: string;
+  onStatusChange: (v: string) => void;
 };
 
 export function OrdersFilters({
@@ -18,6 +28,8 @@ export function OrdersFilters({
   onClientChange,
   dateFilter,
   onDateChange,
+  status,
+  onStatusChange,
 }: Props) {
   return (
     <div className='flex items-center gap-3'>
@@ -37,6 +49,13 @@ export function OrdersFilters({
         value={dateFilter}
         onChange={onDateChange}
         placeholder='주문 날짜'
+      />
+      <SelectFilter
+        value={status}
+        onChange={onStatusChange}
+        options={STATUS_OPTIONS}
+        placeholder='상태 전체'
+        className='w-36'
       />
     </div>
   );

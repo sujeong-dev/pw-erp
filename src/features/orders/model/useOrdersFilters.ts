@@ -8,6 +8,7 @@ export function useOrdersFilters() {
   const [codeSearch, setCodeSearch] = useState('');
   const [clientSearch, setClientSearch] = useState('');
   const [dateFilter, setDateFilter] = useState<Date | undefined>(undefined);
+  const [status, setStatus] = useState('all');
 
   const debouncedCode = useDebounce(codeSearch, 300);
   const debouncedClient = useDebounce(clientSearch, 300);
@@ -21,6 +22,8 @@ export function useOrdersFilters() {
     setDateFilter,
     code: debouncedCode || undefined,
     clientName: debouncedClient || undefined,
+    status,
+    setStatus,
     startDate: dateFilter ? format(dateFilter, 'yyyy-MM-dd') : undefined,
     endDate: dateFilter ? format(dateFilter, 'yyyy-MM-dd') : undefined,
   };

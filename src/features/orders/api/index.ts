@@ -22,6 +22,7 @@ export type Order = {
 export type GetOrdersParams = {
   code?: string;
   clientName?: string;
+  status?: string;
   startDate?: string;
   endDate?: string;
   page?: number;
@@ -40,6 +41,7 @@ export async function getOrders(params: GetOrdersParams): Promise<OrdersResponse
   const searchParams: Record<string, string> = {};
   if (params.code) searchParams.code = params.code;
   if (params.clientName) searchParams.clientName = params.clientName;
+  if (params.status) searchParams.status = params.status;
   if (params.startDate) searchParams.startDate = params.startDate;
   if (params.endDate) searchParams.endDate = params.endDate;
   if (params.page !== undefined) searchParams.page = String(params.page);

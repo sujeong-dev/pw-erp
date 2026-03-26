@@ -33,6 +33,7 @@ export const salesHandlers = [
     const url = new URL(request.url);
     const code = url.searchParams.get('code') ?? '';
     const clientName = url.searchParams.get('clientName') ?? '';
+    const status = url.searchParams.get('status') ?? '';
     const startDate = url.searchParams.get('startDate') ?? '';
     const endDate = url.searchParams.get('endDate') ?? '';
     const page = Number(url.searchParams.get('page') ?? 1);
@@ -40,8 +41,8 @@ export const salesHandlers = [
 
     let filtered = mockItems;
     if (code) filtered = filtered.filter((i) => i.code.includes(code));
-    if (clientName)
-      filtered = filtered.filter((i) => i.client.name.includes(clientName));
+    if (clientName) filtered = filtered.filter((i) => i.client.name.includes(clientName));
+    if (status) filtered = filtered.filter((i) => i.status === status);
     if (startDate) filtered = filtered.filter((i) => i.date >= startDate);
     if (endDate) filtered = filtered.filter((i) => i.date <= endDate);
 
