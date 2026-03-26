@@ -1,6 +1,5 @@
 'use client';
 
-import { format } from 'date-fns';
 import { Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -25,19 +24,16 @@ export function LedgerPage() {
     clientName, setClientName, debouncedClientName,
     type, setType,
     status, setStatus,
-    startDate, setStartDate,
-    endDate, setEndDate,
+    dateRange, setDateRange,
+    startDate, endDate,
   } = useLedgerFilters();
   const { page, setPage, reset } = usePagination();
   const { selectedItem, setSelectedItem, clear } = useSelectedLedgerItem();
 
-  const formattedStart = startDate ? format(startDate, 'yyyy-MM-dd') : undefined;
-  const formattedEnd = endDate ? format(endDate, 'yyyy-MM-dd') : undefined;
-
   const { data: summary } = useLedgerSummary({
     clientName: debouncedClientName || undefined,
-    startDate: formattedStart,
-    endDate: formattedEnd,
+    startDate,
+    endDate,
   });
 
   const { data: ledger, isLoading: ledgerLoading } = useLedger({
@@ -45,8 +41,8 @@ export function LedgerPage() {
     clientName: debouncedClientName || undefined,
     type: type !== 'all' ? (type as 'SALES' | 'PAYMENT') : undefined,
     status: status !== 'all' ? status : undefined,
-    startDate: formattedStart,
-    endDate: formattedEnd,
+    startDate,
+    endDate,
     page,
     pageSize: PAGE_SIZE,
   });
@@ -92,10 +88,8 @@ export function LedgerPage() {
           onCodeChange={handleFilterChange(setCode)}
           clientName={clientName}
           onClientNameChange={(v) => { setClientName(v); reset(); }}
-          startDate={startDate}
-          onStartDateChange={(d) => { setStartDate(d); reset(); }}
-          endDate={endDate}
-          onEndDateChange={(d) => { setEndDate(d); reset(); }}
+          dateRange={dateRange}
+          onDateRangeChange={(r) => { setDateRange(r); reset(); }}
           type={type}
           onTypeChange={handleFilterChange(setType)}
           status={status}

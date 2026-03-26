@@ -21,7 +21,7 @@ import { ClientLedgerTable } from '@/src/widgets/client-ledger-table';
 const PAGE_SIZE = 10;
 
 export function ClientDetailPage({ id }: { id: string }) {
-  const { code, setCode, debouncedCode, type, setType, status, setStatus, startDate, setStartDate, endDate, setEndDate } = useLedgerFilters();
+  const { code, setCode, debouncedCode, type, setType, status, setStatus, dateRange, setDateRange, startDate, endDate } = useLedgerFilters();
   const { page, setPage, reset } = usePagination();
 
   const { data: summary, isLoading: summaryLoading } = useClientSummary(id, {
@@ -98,10 +98,8 @@ export function ClientDetailPage({ id }: { id: string }) {
         <LedgerFilters
           code={code}
           onCodeChange={(v) => { setCode(v); reset(); }}
-          startDate={startDate}
-          onStartDateChange={(d) => { setStartDate(d); reset(); }}
-          endDate={endDate}
-          onEndDateChange={(d) => { setEndDate(d); reset(); }}
+          dateRange={dateRange}
+          onDateRangeChange={(r) => { setDateRange(r); reset(); }}
           type={type}
           onTypeChange={(v) => { setType(v); reset(); }}
           status={status}

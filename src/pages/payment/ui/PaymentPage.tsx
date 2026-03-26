@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { format } from 'date-fns';
 import { Plus } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
@@ -25,10 +24,10 @@ export function PaymentPage() {
     clientName,
     setClientName,
     debouncedClientName,
+    dateRange,
+    setDateRange,
     startDate,
-    setStartDate,
     endDate,
-    setEndDate,
   } = usePaymentsFilters();
   const { page, setPage, reset } = usePagination();
 
@@ -36,8 +35,8 @@ export function PaymentPage() {
     creditType: creditType !== 'all' ? (creditType as 'DEPOSIT' | 'REFUND') : undefined,
     method: method !== 'all' ? (method as 'CASH' | 'BILL') : undefined,
     clientName: debouncedClientName || undefined,
-    startDate: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
-    endDate: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
+    startDate,
+    endDate,
     page,
     pageSize: PAGE_SIZE,
   });
@@ -60,14 +59,9 @@ export function PaymentPage() {
           setClientName(v);
           reset();
         }}
-        startDate={startDate}
-        onStartDateChange={(d) => {
-          setStartDate(d);
-          reset();
-        }}
-        endDate={endDate}
-        onEndDateChange={(d) => {
-          setEndDate(d);
+        dateRange={dateRange}
+        onDateRangeChange={(r) => {
+          setDateRange(r);
           reset();
         }}
         creditType={creditType}

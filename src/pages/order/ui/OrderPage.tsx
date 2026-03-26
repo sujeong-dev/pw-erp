@@ -24,8 +24,8 @@ export function OrderPage() {
     setCodeSearch,
     clientSearch,
     setClientSearch,
-    dateFilter,
-    setDateFilter,
+    dateRange,
+    setDateRange,
     status,
     setStatus,
     code,
@@ -86,9 +86,9 @@ export function OrderPage() {
           setClientSearch(v);
           reset();
         }}
-        dateFilter={dateFilter}
-        onDateChange={(d) => {
-          setDateFilter(d);
+        dateRange={dateRange}
+        onDateRangeChange={(r) => {
+          setDateRange(r);
           reset();
         }}
         status={status}

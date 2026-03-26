@@ -1,6 +1,8 @@
 'use client';
 
 import { useState } from 'react';
+import { format } from 'date-fns';
+import type { DateRange } from 'react-day-picker';
 import { useDebounce } from '@/src/shared/lib/hooks';
 
 export function useLedgerFilters() {
@@ -8,8 +10,7 @@ export function useLedgerFilters() {
   const [clientName, setClientName] = useState('');
   const [type, setType] = useState('all');
   const [status, setStatus] = useState('all');
-  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
-  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
 
   const debouncedCode = useDebounce(code, 300);
   const debouncedClientName = useDebounce(clientName, 300);
@@ -19,7 +20,8 @@ export function useLedgerFilters() {
     clientName, setClientName, debouncedClientName,
     type, setType,
     status, setStatus,
-    startDate, setStartDate,
-    endDate, setEndDate,
+    dateRange, setDateRange,
+    startDate: dateRange?.from ? format(dateRange.from, 'yyyy-MM-dd') : undefined,
+    endDate: dateRange?.to ? format(dateRange.to, 'yyyy-MM-dd') : undefined,
   };
 }

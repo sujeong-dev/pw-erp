@@ -1,6 +1,7 @@
 'use client';
 
-import { SearchInput, DateFilter, SelectFilter } from '@/src/shared/ui';
+import type { DateRange } from 'react-day-picker';
+import { SearchInput, DateRangeFilter, SelectFilter } from '@/src/shared/ui';
 import { STATUS_DISPLAY } from '@/src/shared/constants';
 
 type Props = {
@@ -8,10 +9,8 @@ type Props = {
   onCodeChange: (v: string) => void;
   clientName: string;
   onClientNameChange: (v: string) => void;
-  startDate: Date | undefined;
-  onStartDateChange: (d: Date | undefined) => void;
-  endDate: Date | undefined;
-  onEndDateChange: (d: Date | undefined) => void;
+  dateRange: DateRange | undefined;
+  onDateRangeChange: (r: DateRange | undefined) => void;
   type: string;
   onTypeChange: (v: string) => void;
   status: string;
@@ -21,8 +20,7 @@ type Props = {
 export function LedgerFilters({
   code, onCodeChange,
   clientName, onClientNameChange,
-  startDate, onStartDateChange,
-  endDate, onEndDateChange,
+  dateRange, onDateRangeChange,
   type, onTypeChange,
   status, onStatusChange,
 }: Props) {
@@ -30,8 +28,7 @@ export function LedgerFilters({
     <div className='flex items-center gap-3 flex-wrap'>
       <SearchInput value={code} onChange={onCodeChange} placeholder='매출 코드 검색' />
       <SearchInput value={clientName} onChange={onClientNameChange} placeholder='거래처명 검색' />
-      <DateFilter value={startDate} onChange={onStartDateChange} placeholder='시작일' />
-      <DateFilter value={endDate} onChange={onEndDateChange} placeholder='종료일' />
+      <DateRangeFilter value={dateRange} onChange={onDateRangeChange} />
       <SelectFilter
         value={type}
         onChange={onTypeChange}

@@ -1,6 +1,7 @@
 "use client";
 
-import { DateFilter, SearchInput, SelectFilter } from "@/src/shared/ui";
+import type { DateRange } from "react-day-picker";
+import { DateRangeFilter, SearchInput, SelectFilter } from "@/src/shared/ui";
 
 const STATUS_OPTIONS = [
   { value: 'all', label: '상태 전체' },
@@ -15,8 +16,8 @@ type Props = {
   onCodeChange: (v: string) => void;
   clientSearch: string;
   onClientChange: (v: string) => void;
-  dateFilter: Date | undefined;
-  onDateChange: (d: Date | undefined) => void;
+  dateRange: DateRange | undefined;
+  onDateRangeChange: (r: DateRange | undefined) => void;
   status: string;
   onStatusChange: (v: string) => void;
 };
@@ -26,8 +27,8 @@ export function OrdersFilters({
   onCodeChange,
   clientSearch,
   onClientChange,
-  dateFilter,
-  onDateChange,
+  dateRange,
+  onDateRangeChange,
   status,
   onStatusChange,
 }: Props) {
@@ -45,11 +46,7 @@ export function OrdersFilters({
         placeholder='거래처 검색'
         className='w-56'
       />
-      <DateFilter
-        value={dateFilter}
-        onChange={onDateChange}
-        placeholder='주문 날짜'
-      />
+      <DateRangeFilter value={dateRange} onChange={onDateRangeChange} />
       <SelectFilter
         value={status}
         onChange={onStatusChange}

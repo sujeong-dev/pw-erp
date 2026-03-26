@@ -1,14 +1,13 @@
 'use client';
 
-import { SearchInput, DateFilter, SelectFilter } from '@/src/shared/ui';
+import type { DateRange } from 'react-day-picker';
+import { SearchInput, DateRangeFilter, SelectFilter } from '@/src/shared/ui';
 
 type Props = {
   clientName: string;
   onClientNameChange: (v: string) => void;
-  startDate: Date | undefined;
-  onStartDateChange: (d: Date | undefined) => void;
-  endDate: Date | undefined;
-  onEndDateChange: (d: Date | undefined) => void;
+  dateRange: DateRange | undefined;
+  onDateRangeChange: (r: DateRange | undefined) => void;
   creditType: string;
   onCreditTypeChange: (v: string) => void;
   method: string;
@@ -17,16 +16,14 @@ type Props = {
 
 export function PaymentsFilters({
   clientName, onClientNameChange,
-  startDate, onStartDateChange,
-  endDate, onEndDateChange,
+  dateRange, onDateRangeChange,
   creditType, onCreditTypeChange,
   method, onMethodChange,
 }: Props) {
   return (
     <div className='flex items-center gap-3 flex-wrap'>
       <SearchInput value={clientName} onChange={onClientNameChange} placeholder='거래처 검색' className='w-56' />
-      <DateFilter value={startDate} onChange={onStartDateChange} placeholder='시작일' />
-      <DateFilter value={endDate} onChange={onEndDateChange} placeholder='종료일' />
+      <DateRangeFilter value={dateRange} onChange={onDateRangeChange} />
       <SelectFilter
         value={creditType}
         onChange={onCreditTypeChange}
