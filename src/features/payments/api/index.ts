@@ -6,7 +6,7 @@ export type Payment = {
   date: string;
   clientName: string;
   amount: number;
-  method: 'CASH' | 'NOTE';
+  method: 'CASH' | 'BILL';
 };
 
 export type PaymentsResponse = {
@@ -19,6 +19,7 @@ export type PaymentsResponse = {
 
 export type GetPaymentsParams = {
   creditType?: 'DEPOSIT' | 'REFUND';
+  method?: 'CASH' | 'BILL';
   clientName?: string;
   startDate?: string;
   endDate?: string;
@@ -30,7 +31,7 @@ export type CreatePaymentRequest = {
   clientId: string;
   date: string;
   amount: number;
-  method: 'CASH' | 'NOTE';
+  method: 'CASH' | 'BILL';
   memo?: string;
 };
 
@@ -41,6 +42,7 @@ export async function createPayment(body: CreatePaymentRequest): Promise<Payment
 export async function getPayments(params: GetPaymentsParams): Promise<PaymentsResponse> {
   const searchParams: Record<string, string> = {};
   if (params.creditType) searchParams.creditType = params.creditType;
+  if (params.method) searchParams.method = params.method;
   if (params.clientName) searchParams.clientName = params.clientName;
   if (params.startDate) searchParams.startDate = params.startDate;
   if (params.endDate) searchParams.endDate = params.endDate;

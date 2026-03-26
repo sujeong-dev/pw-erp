@@ -11,6 +11,8 @@ type Props = {
   onEndDateChange: (d: Date | undefined) => void;
   creditType: string;
   onCreditTypeChange: (v: string) => void;
+  method: string;
+  onMethodChange: (v: string) => void;
 };
 
 export function PaymentsFilters({
@@ -18,6 +20,7 @@ export function PaymentsFilters({
   startDate, onStartDateChange,
   endDate, onEndDateChange,
   creditType, onCreditTypeChange,
+  method, onMethodChange,
 }: Props) {
   return (
     <div className='flex items-center gap-3 flex-wrap'>
@@ -33,6 +36,16 @@ export function PaymentsFilters({
           { value: 'REFUND', label: '환불' },
         ]}
         className='w-32'
+      />
+      <SelectFilter
+        value={method}
+        onChange={onMethodChange}
+        options={[
+          { value: 'all', label: '방법 전체' },
+          { value: 'CASH', label: '현금' },
+          { value: 'BILL', label: '어음' },
+        ]}
+        className='w-36'
       />
     </div>
   );

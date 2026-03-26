@@ -20,6 +20,8 @@ export function PaymentPage() {
   const {
     creditType,
     setCreditType,
+    method,
+    setMethod,
     clientName,
     setClientName,
     debouncedClientName,
@@ -31,8 +33,8 @@ export function PaymentPage() {
   const { page, setPage, reset } = usePagination();
 
   const { data, isLoading } = usePayments({
-    creditType:
-      creditType !== 'all' ? (creditType as 'DEPOSIT' | 'REFUND') : undefined,
+    creditType: creditType !== 'all' ? (creditType as 'DEPOSIT' | 'REFUND') : undefined,
+    method: method !== 'all' ? (method as 'CASH' | 'BILL') : undefined,
     clientName: debouncedClientName || undefined,
     startDate: startDate ? format(startDate, 'yyyy-MM-dd') : undefined,
     endDate: endDate ? format(endDate, 'yyyy-MM-dd') : undefined,
@@ -71,6 +73,11 @@ export function PaymentPage() {
         creditType={creditType}
         onCreditTypeChange={(v) => {
           setCreditType(v);
+          reset();
+        }}
+        method={method}
+        onMethodChange={(v) => {
+          setMethod(v);
           reset();
         }}
       />
